@@ -8,7 +8,7 @@
 import SwiftUI
 import SwiftData
 
-struct CompletedToDoList: View {
+struct CompletedToDoListView: View {
     
     @Query private var completedList: [Todo]
     init() {
@@ -69,5 +69,5 @@ struct CompletedToDoList: View {
 }
 
 #Preview {
-    CompletedToDoList()
+    CompletedToDoListView()
 }

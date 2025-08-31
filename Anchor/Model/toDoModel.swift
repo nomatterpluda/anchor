@@ -6,13 +6,20 @@
 //
 
 import SwiftUI
+import SwiftData
 
-struct toDoModel: View {
-    var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+@Model
+class Todo {
+    private(set) var taskID: String = UUID().uuidString
+    var taskName: String
+    var isCompleted: Bool = false
+    var lastUpdate: Date = Date.now
+    
+    init(taskID: String, taskName: String, isCompleted: Bool) {
+        self.taskID = taskID
+        self.taskName = taskName
+        self.isCompleted = isCompleted
     }
 }
 
-#Preview {
-    toDoModel()
-}
+
