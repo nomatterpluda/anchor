@@ -10,11 +10,17 @@ import SwiftData
 
 @main
 struct AnchorApp: App {
+    
+    @StateObject var activeToDoListViewModel: ActiveToDoListViewModel = ActiveToDoListViewModel()
+    @StateObject var completedToDoListViewModel: CompletedToDoListViewModel = CompletedToDoListViewModel()
+    
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .modelContainer(for: Todo.self)
         }
-        .modelContainer(for: Todo.self)
+        .environmentObject(activeToDoListViewModel)
+        .environmentObject(completedToDoListViewModel)
     }
 }
 
