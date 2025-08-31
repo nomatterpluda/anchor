@@ -9,16 +9,26 @@ import SwiftUI
 
 struct ToDoRowView: View {
     
-    // Vars
+   
+    
+    //View Properties
     
     @Bindable var todo : Todo
     @FocusState private var isActive: Bool
+    @Environment(\.modelContext) private var context
+   
     var body: some View {
-        
-    // Views
-        
         HStack (spacing: 12){
-            Button(action: {}, label: {
+            Button(action: {
+                if todo.isCompleted {
+                    Haptic.shared.lightImpact()
+                } else {
+                    Haptic.shared.mediumImpact()
+                }
+                
+                todo.isCompleted.toggle()
+                todo.lastUpdate = .now
+            }, label: {
                 Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(.headline,design: .rounded, weight: .bold))
                     .foregroundStyle(todo.isCompleted ? .blue: .primary.opacity(0.50))
@@ -32,15 +42,15 @@ struct ToDoRowView: View {
                 .foregroundStyle(todo.isCompleted ? .white.opacity(0.50): .primary)
                 .focused($isActive)
         }
+        .listRowSeparator(.hidden)
     }
 }
+
 
 #Preview {
     ToDoRowView(
         todo: Todo(
-            taskID: UUID().uuidString,
-            taskName: "Hello World",
-            isCompleted: false
+            taskName: "Hello World"
         )
     )
 }

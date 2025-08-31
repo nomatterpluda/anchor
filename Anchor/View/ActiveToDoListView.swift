@@ -2,33 +2,28 @@
 import SwiftUI
 import SwiftData
 
-struct ActiveToDoList: View {
+struct ActiveToDoListView: View {
   
     @Query(filter: #Predicate<Todo> {!$0.isCompleted}, sort: [SortDescriptor(\Todo.lastUpdate, order: .forward)], animation: .snappy)
     private var activeList: [Todo]
     
     //View Properties
-    @State private var isAddingTask: Bool = false
     @State private var newTaskText: String = ""
     @FocusState private var isTaskFieldFocused: Bool
-    let onAddTask: (String) -> Void
+    @Environment(\.modelContext) private var context
     
     
     var body: some View {
         Section {
             ForEach(activeList) { todo in
                 ToDoRowView(todo: todo)
-                    .listRowSeparator(.hidden)
             }
-               // .onDelete(perform: deleteTask)
-               // .onMove(perform: { indices, newOffset in
-               //  moveTask(indices: indices, newOffset: newOffset)
-            //})
-            
+            .onDelete(perform: deleteTask)
+           
             // Input section
             HStack (spacing: 16){
-                    Button(action: {}, label: {
-                        Image(systemName: "plus.circle.fill")
+                    Button(action: addTask, label: {
+                        Image(systemName: iconName)
                             .font(.system(.headline,design: .rounded, weight: .bold))
                             .foregroundStyle(.blue)
                             .contentTransition(.symbolEffect(.replace))
@@ -40,19 +35,22 @@ struct ActiveToDoList: View {
                             .foregroundStyle(.white)
                             .focused($isTaskFieldFocused)
                             .onSubmit {
-                                if !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-                                    onAddTask(newTaskText.trimmingCharacters(in: .whitespacesAndNewlines))
-                                    newTaskText = ""
-                                }
-                                isTaskFieldFocused = false
+                                addTask()
                             }
+                
                 }
-               
             
-            
-            
-            
-  
+        }
+        header: {
+            HStack {
+                Image(systemName: "circle.dotted")
+                    .font(.system(.title2, design: .rounded).bold())
+                Text("\(activeSectionTitle)")
+                    .font(.system(.title, design: .rounded).bold())
+                Spacer()
+                Button("View all") { }
+            }
+            .foregroundStyle(.white.opacity(0.25))
         }
     }
     
@@ -62,10 +60,23 @@ struct ActiveToDoList: View {
         return count == 0 ? "Tasks" : "Tasks (\(count))"
     }
     
-    // delete Task
-    func deleteTask(at offsets: IndexSet) {
-        // Note: You'll need to implement this with your actual data source
-        // activeList.remove(atOffsets: offsets) // This won't work with @Query
+    // Dynamic icon based on text field state
+    var iconName: String {
+        if isTaskFieldFocused && !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            return "checkmark.circle.fill"
+        } else {
+            return "plus.circle.fill"
+        }
+    }
+    
+    // add task
+    func addTask() {
+        if !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let newToDo = Todo(taskName: newTaskText.trimmingCharacters(in: .whitespacesAndNewlines))
+            context.insert(newToDo)
+            newTaskText = ""
+        }
+        isTaskFieldFocused = false
     }
     
     // move task
@@ -73,10 +84,17 @@ struct ActiveToDoList: View {
         // Note: You'll need to implement this with your actual data source
         // activeList.move(fromOffsets: indices, toOffset: newOffset) // This won't work with @Query
     }
+    
+    // delete task
+    func deleteTask(at offsets: IndexSet) {
+        for index in offsets {
+            let todoToDelete = activeList[index]
+            context.delete(todoToDelete)
+        }
+    }
 }
 
 #Preview {
-    ActiveToDoList { taskText in
-        print("Adding task: \(taskText)")
+    ActiveToDoListView()
     }
-}
+

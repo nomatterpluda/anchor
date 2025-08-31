@@ -15,10 +15,8 @@ class Todo {
     var isCompleted: Bool = false
     var lastUpdate: Date = Date.now
     
-    init(taskID: String, taskName: String, isCompleted: Bool) {
-        self.taskID = taskID
+    init(taskName: String,) {
         self.taskName = taskName
-        self.isCompleted = isCompleted
     }
 }
 

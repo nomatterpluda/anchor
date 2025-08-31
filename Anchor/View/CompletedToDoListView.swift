@@ -1,9 +1,3 @@
-//
-//  completedToDo.swift
-//  Anchor
-//
-//  Created by Alex Pluda on 29/08/25.
-//
 
 import SwiftUI
 import SwiftData
@@ -11,9 +5,11 @@ import SwiftData
 struct CompletedToDoListView: View {
     
     @Query private var completedList: [Todo]
+    @Environment(\.modelContext) private var context
+    
     init() {
         let predicate = #Predicate<Todo> { $0.isCompleted }
-        let sort = [SortDescriptor(\Todo.lastUpdate, order: .reverse)]
+        let sort = [SortDescriptor(\Todo.lastUpdate, order: .forward)]
         
         var descriptor = FetchDescriptor(predicate: predicate, sortBy: sort)
         if !showAll {
@@ -23,11 +19,21 @@ struct CompletedToDoListView: View {
         
         _completedList = Query(descriptor, animation: .snappy)
     }
-    //view Properties
+    
+    //View Properties
+    
     @State private var showAll: Bool = false
+    
+    //View
+    
     var body: some View {
         Section(
-            content: {},
+            content: {
+                ForEach(completedList) {
+                    ToDoRowView(todo: $0)
+                }
+                .onDelete(perform: deleteTask)
+            },
             header: {
                 HStack {
                     Image(systemName: "checkmark.circle.fill")
@@ -56,15 +62,21 @@ struct CompletedToDoListView: View {
             }
             
         )
-            
         .listRowInsets(.init(top: 12,leading: 16, bottom: 12, trailing: 0))
-        
-        
-        // List header
-        var completedSectionTitle: String {
-            let count = completedList.count
-            return count == 0 ? "Completed" : "Completed (\(count))"
+    }
+    
+    // delete task
+    func deleteTask(at offsets: IndexSet) {
+        for index in offsets {
+            let todoToDelete = completedList[index]
+            context.delete(todoToDelete)
         }
+    }
+    
+    // List header
+    var completedSectionTitle: String {
+        let count = completedList.count
+        return count == 0 ? "Completed" : "Completed (\(count))"
     }
 }
 

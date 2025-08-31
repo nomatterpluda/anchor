@@ -19,24 +19,7 @@ struct AnchorApp: App {
 }
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    
     var body: some View {
-        ToDoView(onAddTask: addTask)
-    }
-    
-    private func addTask(_ taskName: String) {
-        let newTodo = Todo(
-            taskID: UUID().uuidString,
-            taskName: taskName,
-            isCompleted: false,
-        )
-        modelContext.insert(newTodo)
-        
-        do {
-            try modelContext.save()
-        } catch {
-            print("Failed to save todo: \(error)")
-        }
+        ToDoView()
     }
 }

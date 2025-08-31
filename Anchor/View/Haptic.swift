@@ -8,8 +8,8 @@
 import UIKit
 
 /// A centralized manager for handling haptic feedback throughout the app
-final class HapticManager {
-    static let shared = HapticManager()
+final class Haptic {
+    static let shared = Haptic()
     
     private init() {}
     
