@@ -1,9 +1,4 @@
-//
-//  toDoModel.swift
-//  Anchor
-//
-//  Created by Alex Pluda on 29/08/25.
-//
+
 
 import SwiftUI
 import SwiftData
@@ -15,8 +10,12 @@ class Todo {
     var isCompleted: Bool = false
     var lastUpdate: Date = Date.now
     
+    // Project relationship
+    var project: ProjectModel?
+    
     init(taskName: String,) {
         self.taskName = taskName
+        self.project = project
     }
 }
 
