@@ -60,26 +60,4 @@ final class Haptic {
         let generator = UISelectionFeedbackGenerator()
         generator.selectionChanged()
     }
-    
-    // MARK: - Task-Specific Feedback
-    
-    /// Specific feedback for completing a task
-    func taskCompleted() {
-        success()
-    }
-    
-    /// Specific feedback for uncompleting a task
-    func taskUncompleted() {
-        mediumImpact()
-    }
-    
-    /// Specific feedback for deleting a task
-    func taskDeleted() {
-        warning()
-    }
-    
-    /// Specific feedback for creating a new task
-    func taskCreated() {
-        lightImpact()
-    }
 }
