@@ -1,9 +1,3 @@
-//
-//  ToDoRowView.swift
-//  Anchor
-//
-//  Created by Alex Pluda on 29/08/25.
-//
 
 import SwiftUI
 

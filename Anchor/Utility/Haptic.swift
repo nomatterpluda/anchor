@@ -1,9 +1,3 @@
-//
-//  HapticManager.swift
-//  Anchor
-//
-//  Created by Alex Pluda on 31/08/25.
-//
 
 import UIKit
 

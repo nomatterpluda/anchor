@@ -1,9 +1,3 @@
-//
-//  ContentView.swift
-//  Anchor
-//
-//  Created by Alex Pluda on 28/08/25.
-//
 
 import SwiftUI
 import SwiftData

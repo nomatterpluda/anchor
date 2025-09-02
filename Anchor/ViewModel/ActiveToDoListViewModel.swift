@@ -5,9 +5,9 @@ internal import Combine
 
 class ActiveToDoListViewModel: ObservableObject {
     
- 
-    //View Properties
+    // View Properties
     @Published var newTaskText: String = ""
+    @Published var projectViewModel: ProjectViewModel?
     
     var context: ModelContext?
     
@@ -25,17 +25,22 @@ class ActiveToDoListViewModel: ObservableObject {
         }
     }
     
-    // add task
+    // Add task
     func addTask(dismissFocus: @escaping () -> Void) {
         if !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let newToDo = Todo(taskName: newTaskText.trimmingCharacters(in: .whitespacesAndNewlines))
+            if let currentProject = projectViewModel?.currentProject {
+                newToDo.project = currentProject
+            }
+            
             context?.insert(newToDo)
             newTaskText = ""
         }
         dismissFocus()
     }
     
-    // delete task
+    
+    // Delete task
     func deleteTask(todo: Todo) {
         context?.delete(todo)
     }

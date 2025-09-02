@@ -4,23 +4,43 @@ import SwiftData
 
 struct ActiveToDoListView: View {
   
-    @Query(filter: #Predicate<Todo> {!$0.isCompleted}, sort: [SortDescriptor(\Todo.lastUpdate, order: .forward)], animation: .snappy)
-    private var activeList: [Todo]
+    @Query private var activeList: [Todo]
+    
+    init() {
+          // We'll need dynamic filtering based on current project
+          // For now, we'll fetch all and filter in body
+          _activeList = Query(
+              filter: #Predicate<Todo> { !$0.isCompleted },
+              sort: [SortDescriptor(\Todo.lastUpdate, order: .forward)],
+              animation: .snappy
+          )
+      }
     
     //View Properties
     @EnvironmentObject var activeToDoListViewModel: ActiveToDoListViewModel
+    @EnvironmentObject var projectViewModel: ProjectViewModel
     @Environment(\.modelContext) private var context
     @FocusState private var isTaskFieldFocused: Bool
     
+    private var filteredActiveList: [Todo] {
+          if projectViewModel.isViewingAllProjects {
+              return activeList // Show all tasks
+          } else {
+              return activeList.filter { $0.project?.projectID == projectViewModel.currentProject?.projectID }
+          }
+      }
+
+   
+
     
     var body: some View {
         Section {
-            ForEach(activeList) { todo in
+            ForEach(filteredActiveList) { todo in
                 ToDoRowView(todo: todo)
             }
             .onDelete { indexSet in
                 for index in indexSet {
-                    activeToDoListViewModel.deleteTask(todo: activeList[index])
+                    activeToDoListViewModel.deleteTask(todo: filteredActiveList[index])
                 }
             }
            

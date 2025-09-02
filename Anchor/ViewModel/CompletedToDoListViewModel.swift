@@ -1,9 +1,3 @@
-//
-//  CompletedToDoListView.swift
-//  Anchor
-//
-//  Created by Alex Pluda on 31/08/25.
-//
 
 import Foundation
 import SwiftData
@@ -47,6 +41,6 @@ class CompletedToDoListViewModel: ObservableObject {
     // Delete task
     func deleteTask(todo: Todo) {
         context?.delete(todo)
-        Haptic.shared.taskDeleted()
+        Haptic.shared.lightImpact()
     }
 }

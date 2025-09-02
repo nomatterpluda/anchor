@@ -1,5 +1,4 @@
 
-
 import Foundation
 import SwiftData
 internal import Combine
@@ -133,4 +132,3 @@ enum ProjectDisplayItem: Identifiable {
         }
     }
 }
-
