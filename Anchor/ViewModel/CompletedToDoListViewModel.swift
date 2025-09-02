@@ -7,6 +7,7 @@ class CompletedToDoListViewModel: ObservableObject {
 
     // Published Properties
     @Published var showAll: Bool = false
+    @Published var projectViewModel: ProjectViewModel?  
 
     var context: ModelContext?
 
