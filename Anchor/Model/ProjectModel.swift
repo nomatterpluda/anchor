@@ -18,8 +18,8 @@ class ProjectModel {
     
     init(name: String, icon: String = "folder.fill", color: String = "blue", orderIndex: Int = 0) {
         self.projectName = name
-        self.projectColor = icon
-        self.projectIcon = color
+        self.projectColor = color
+        self.projectIcon = icon
         self.orderIndex = orderIndex
     }
     

@@ -14,7 +14,6 @@ class Todo {
     
     init(taskName: String,) {
         self.taskName = taskName
-        self.project = project
     }
 }
 
