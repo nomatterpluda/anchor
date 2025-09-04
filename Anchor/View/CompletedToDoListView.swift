@@ -5,31 +5,40 @@ import SwiftUI
   struct CompletedToDoListView: View {
 
       @Query private var completedList: [Todo]
+      let project: ProjectModel? // nil means "All" projects
       @EnvironmentObject var completedToDoListViewModel: CompletedToDoListViewModel
       @EnvironmentObject var projectViewModel: ProjectViewModel
       @Environment(\.modelContext) private var context
 
-      init() {
-          // The query will be recreated when the view reinitializes
-          // We'll use the ViewModel's current showAll state via a computed property
-          let viewModel = CompletedToDoListViewModel() // Temporary to get descriptor
-          _completedList = Query(viewModel.fetchDescriptor, animation: .snappy)
+      init(project: ProjectModel? = nil) {
+          self.project = project
+          
+          if let project = project {
+              // Capture project ID to avoid complex predicate
+              let projectID = project.projectID
+              _completedList = Query(
+                  filter: #Predicate<Todo> { todo in
+                      todo.isCompleted && todo.project?.projectID == projectID
+                  },
+                  sort: [SortDescriptor(\Todo.lastUpdate, order: .reverse)],
+                  animation: .snappy
+              )
+          } else {
+              // Show all projects
+              _completedList = Query(
+                  filter: #Predicate<Todo> { $0.isCompleted },
+                  sort: [SortDescriptor(\Todo.lastUpdate, order: .reverse)],
+                  animation: .snappy
+              )
+          }
       }
       
       private var filteredCompletedList: [Todo] {
-            // First filter by project
-            let projectFilteredList: [Todo]
-            if projectViewModel.isViewingAllProjects {
-                projectFilteredList = completedList // Show all projects
-            } else {
-                projectFilteredList = completedList.filter { $0.project?.projectID == projectViewModel.currentProject?.projectID }
-            }
-
-            // Then apply show all/recent limit
+            // Query already handles project filtering, just apply show all/recent limit
             if completedToDoListViewModel.showAll {
-                return projectFilteredList // Show all completed tasks from selected project
+                return completedList // Show all completed tasks from selected project
             } else {
-                return Array(projectFilteredList.prefix(5)) // Show only recent 5 from selected project
+                return Array(completedList.prefix(5)) // Show only recent 5 from selected project
             }
         }
 

@@ -26,10 +26,14 @@ class ActiveToDoListViewModel: ObservableObject {
     }
     
     // Add task
-    func addTask(dismissFocus: @escaping () -> Void) {
+    func addTask(to project: ProjectModel? = nil, dismissFocus: @escaping () -> Void) {
         if !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let newToDo = Todo(taskName: newTaskText.trimmingCharacters(in: .whitespacesAndNewlines))
-            if let currentProject = projectViewModel?.currentProject {
+            
+            // Use provided project or fall back to current project from projectViewModel
+            if let project = project {
+                newToDo.project = project
+            } else if let currentProject = projectViewModel?.currentProject {
                 newToDo.project = currentProject
             }
             

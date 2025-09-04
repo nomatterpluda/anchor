@@ -5,16 +5,30 @@ import SwiftData
 struct ActiveToDoListView: View {
   
     @Query private var activeList: [Todo]
+    let project: ProjectModel? // nil means "All" projects
     
-    init() {
-          // We'll need dynamic filtering based on current project
-          // For now, we'll fetch all and filter in body
-          _activeList = Query(
-              filter: #Predicate<Todo> { !$0.isCompleted },
-              sort: [SortDescriptor(\Todo.lastUpdate, order: .forward)],
-              animation: .snappy
-          )
-      }
+    init(project: ProjectModel? = nil) {
+        self.project = project
+        
+        if let project = project {
+            // Capture project ID to avoid complex predicate
+            let projectID = project.projectID
+            _activeList = Query(
+                filter: #Predicate<Todo> { todo in
+                    !todo.isCompleted && todo.project?.projectID == projectID
+                },
+                sort: [SortDescriptor(\Todo.lastUpdate, order: .forward)],
+                animation: .snappy
+            )
+        } else {
+            // Show all projects
+            _activeList = Query(
+                filter: #Predicate<Todo> { !$0.isCompleted },
+                sort: [SortDescriptor(\Todo.lastUpdate, order: .forward)],
+                animation: .snappy
+            )
+        }
+    }
     
     //View Properties
     @EnvironmentObject var activeToDoListViewModel: ActiveToDoListViewModel
@@ -22,13 +36,10 @@ struct ActiveToDoListView: View {
     @Environment(\.modelContext) private var context
     @FocusState private var isTaskFieldFocused: Bool
     
+    // Remove filteredActiveList since filtering is now handled by Query
     private var filteredActiveList: [Todo] {
-          if projectViewModel.isViewingAllProjects {
-              return activeList // Show all tasks
-          } else {
-              return activeList.filter { $0.project?.projectID == projectViewModel.currentProject?.projectID }
-          }
-      }
+        return activeList // Query already handles the filtering
+    }
 
    
 
@@ -47,7 +58,7 @@ struct ActiveToDoListView: View {
             // Input section
             HStack (spacing: 16){
                 Button(action: {
-                    activeToDoListViewModel.addTask(dismissFocus: { 
+                    activeToDoListViewModel.addTask(to: project, dismissFocus: { 
                         isTaskFieldFocused = false 
                     })
                 }, label: {
@@ -63,14 +74,13 @@ struct ActiveToDoListView: View {
                             .foregroundStyle(.white)
                             .focused($isTaskFieldFocused)
                             .onSubmit {
-                                activeToDoListViewModel.addTask(dismissFocus: { 
+                                activeToDoListViewModel.addTask(to: project, dismissFocus: { 
                                     isTaskFieldFocused = false 
                                 })
                             }
                 }
             
-        }
-        header: {
+        } header: {
             HStack {
                 Image(systemName: "circle.dotted")
                     .font(.system(.title2, design: .rounded).bold())

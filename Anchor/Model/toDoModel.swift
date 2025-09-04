@@ -12,7 +12,7 @@ class Todo {
     // Project relationship
     var project: ProjectModel?
     
-    init(taskName: String,) {
+    init(taskName: String) {
         self.taskName = taskName
     }
 }

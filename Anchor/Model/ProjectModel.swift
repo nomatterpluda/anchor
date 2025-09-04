@@ -4,7 +4,7 @@ import SwiftData
 
 @Model
 class ProjectModel {
-    private(set) var projectID: String = UUID().uuidString
+    @Attribute(.unique) var projectID: String = UUID().uuidString
     var projectName: String
     var projectColor: String
     var projectIcon: String
