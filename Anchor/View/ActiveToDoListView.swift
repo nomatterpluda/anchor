@@ -57,6 +57,7 @@ struct ActiveToDoListView: View {
     
     var body: some View {
         Section {
+          
             ForEach(filteredActiveList) { todo in
                 ToDoRowView(todo: todo)
             }
@@ -65,12 +66,12 @@ struct ActiveToDoListView: View {
                     activeToDoListViewModel.deleteTask(todo: filteredActiveList[index])
                 }
             }
-           
+            
             // Input section
             HStack (spacing: 16){
                 Button(action: {
-                    activeToDoListViewModel.addTask(to: project, dismissFocus: { 
-                        isTaskFieldFocused = false 
+                    activeToDoListViewModel.addTask(to: project, dismissFocus: {
+                        isTaskFieldFocused = false
                     })
                 }, label: {
                         Image(systemName: activeToDoListViewModel.iconName(isTaskFieldFocused: isTaskFieldFocused))
@@ -85,12 +86,13 @@ struct ActiveToDoListView: View {
                             .foregroundStyle(.white)
                             .focused($isTaskFieldFocused)
                             .onSubmit {
-                                activeToDoListViewModel.addTask(to: project, dismissFocus: { 
-                                    isTaskFieldFocused = false 
+                                activeToDoListViewModel.addTask(to: project, dismissFocus: {
+                                    isTaskFieldFocused = false
                                 })
                             }
                 }
-            
+           
+     
         } header: {
             HStack {
                 Image(systemName: "circle.dotted")
