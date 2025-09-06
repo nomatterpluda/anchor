@@ -1,3 +1,13 @@
+/*
+ * ActiveToDoListView.swift
+ * 
+ * ACTIVE TASKS LIST SECTION
+ * - Shows incomplete tasks filtered by selected project
+ * - Includes "Add Task" input field with dynamic icon (+ or ✓)
+ * - Supports swipe-to-delete functionality
+ * - Uses @Query with project-specific filtering for performance
+ * - Contains section header with task count and "View all" button
+ */
 
 import SwiftUI
 import SwiftData

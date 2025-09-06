@@ -1,3 +1,14 @@
+/*
+ * ProjectSelectorBar.swift
+ * 
+ * BOTTOM PROJECT SELECTOR COMPONENT
+ * - Horizontal scrollable bar with project buttons
+ * - Snap-to-left behavior: leftmost visible project is always selected
+ * - Smooth scrolling animations and haptic feedback
+ * - Fixed-width buttons for consistent pagination
+ * - Integrates with ProjectSelectionViewModel for state management
+ */
+
 import SwiftUI
 import SwiftData
 

@@ -1,3 +1,13 @@
+/*
+ * toDoModel.swift
+ * 
+ * TODO SWIFTDATA MODEL
+ * - Defines individual task entity with name, completion status, and timestamps
+ * - Has many-to-one relationship with ProjectModel (optional)
+ * - Tracks creation and last update dates
+ * - Uses UUID for unique identification
+ * - Core model for task management functionality
+ */
 
 import SwiftUI
 import SwiftData

@@ -1,3 +1,14 @@
+/*
+ * ProjectSelectorButton.swift
+ * 
+ * INDIVIDUAL PROJECT BUTTON COMPONENT
+ * - Displays project icon in colored circular background
+ * - Shows project name with dynamic styling based on selection state
+ * - Selected: Full color circle with white icon, white text
+ * - Unselected: Semi-transparent circle with colored icon, muted text
+ * - Reusable component used by ProjectSelectorBar
+ */
+
 import SwiftUI
 
 struct ProjectSelectorButton: View {

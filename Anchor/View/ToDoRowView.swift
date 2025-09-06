@@ -1,3 +1,13 @@
+/*
+ * ToDoRowView.swift
+ * 
+ * INDIVIDUAL TASK ROW COMPONENT
+ * - Displays single task with checkbox and editable name
+ * - Checkbox toggles task completion status with haptic feedback
+ * - Task name is editable inline
+ * - Reusable component used by both Active and Completed task lists
+ * - Handles task state changes through @Bindable todo model
+ */
 
 import SwiftUI
 

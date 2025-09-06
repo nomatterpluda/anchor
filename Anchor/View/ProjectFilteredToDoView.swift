@@ -1,3 +1,14 @@
+/*
+ * ProjectFilteredToDoView.swift
+ * 
+ * MAIN TASK MANAGEMENT INTERFACE
+ * - Single-page task manager with bottom project selector
+ * - Shows completed and active tasks filtered by selected project
+ * - Uses ProjectSelectorBar for horizontal project navigation
+ * - Includes smooth animations and haptic feedback
+ * - Replaces the old TabView paginated approach
+ */
+
 import SwiftUI
 import SwiftData
 
@@ -33,23 +44,7 @@ struct ProjectFilteredToDoView: View {
     
     // MARK: - Task List
     private var taskListView: some View {
-        List {
-            CompletedToDoListView(project: projectSelectionViewModel.selectedProject)
-                .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 0))
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                    removal: .opacity.combined(with: .move(edge: .leading))
-                ))
-            
-            ActiveToDoListView(project: projectSelectionViewModel.selectedProject)
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                    removal: .opacity.combined(with: .move(edge: .leading))
-                ))
-        }
-        .listStyle(.insetGrouped)
-        .environment(\.defaultMinListRowHeight, 0)
-        .animation(.easeInOut(duration: 0.4), value: projectSelectionViewModel.selectedProject?.projectID)
+        TaskListView(selectedProject: projectSelectionViewModel.selectedProject)
     }
 }
 

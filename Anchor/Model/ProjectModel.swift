@@ -1,3 +1,13 @@
+/*
+ * ProjectModel.swift
+ * 
+ * PROJECT SWIFTDATA MODEL
+ * - Defines project entity with name, icon, color, and order
+ * - Has one-to-many relationship with Todo items
+ * - Includes computed properties for filtering active/completed todos
+ * - Provides factory method for creating the special "All" project
+ * - Uses cascade delete to remove associated todos when project is deleted
+ */
 
 import Foundation
 import SwiftData

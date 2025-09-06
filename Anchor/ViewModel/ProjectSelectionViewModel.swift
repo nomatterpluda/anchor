@@ -1,3 +1,14 @@
+/*
+ * ProjectSelectionViewModel.swift
+ * 
+ * PROJECT SELECTION BUSINESS LOGIC (MVVM)
+ * - Manages selected project state and scroll position
+ * - Handles project selection with haptic feedback
+ * - Provides project options array combining "All" + individual projects
+ * - Coordinates scroll animations and position changes
+ * - Separates business logic from UI components
+ */
+
 import Foundation
 import SwiftData
 internal import Combine

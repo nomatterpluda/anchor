@@ -1,3 +1,14 @@
+/*
+ * CompletedToDoListView.swift
+ * 
+ * COMPLETED TASKS LIST SECTION
+ * - Shows completed tasks filtered by selected project
+ * - Toggle between "recent 5" and "show all" display modes
+ * - Supports swipe-to-delete functionality
+ * - Uses @Query with project-specific filtering for performance
+ * - Contains section header with task count and toggle buttons
+ * - Shows footer with "Show all" button when in recent mode
+ */
 
 import SwiftUI
   import SwiftData

@@ -1,3 +1,13 @@
+/*
+ * ProjectOption.swift
+ * 
+ * PROJECT SELECTION DOMAIN MODEL
+ * - Enum representing either "All projects" or a specific project
+ * - Provides computed properties for name, icon, color display
+ * - Abstracts the difference between "All" virtual project and real projects
+ * - Used by ProjectSelectorBar and ProjectSelectionViewModel
+ */
+
 import Foundation
 
 // MARK: - Project Option Enum

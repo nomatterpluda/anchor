@@ -1,3 +1,11 @@
+/*
+ * AnchorApp.swift
+ * 
+ * MAIN APP ENTRY POINT
+ * - Configures SwiftData model container for Todo and ProjectModel
+ * - Sets up global ViewModels as environment objects
+ * - Routes to ContentView → ToDoView as the main interface
+ */
 
 import SwiftUI
 import SwiftData

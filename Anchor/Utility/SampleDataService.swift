@@ -1,3 +1,14 @@
+/*
+ * SampleDataService.swift
+ * 
+ * SAMPLE DATA CREATION UTILITY
+ * - Creates sample projects and tasks for testing and development
+ * - Only runs if database is empty (first launch)
+ * - Generates realistic test data with proper relationships
+ * - Includes projects: Work, Aria, Learning, Health, Travel
+ * - Creates both active and completed tasks for testing different scenarios
+ */
+
 import Foundation
 import SwiftData
 
