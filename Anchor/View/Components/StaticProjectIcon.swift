@@ -16,19 +16,8 @@ struct StaticProjectIcon: View {
     
     private var iconColor: Color {
         // Handle "All" project case (nil) - use gray as default
-        guard let colorString = project?.projectColor else { return .gray }
-        
-        switch colorString {
-        case "blue": return .blue
-        case "green": return .green
-        case "orange": return .orange
-        case "red": return .red
-        case "purple": return .purple
-        case "yellow": return .yellow
-        case "pink": return .pink
-        case "gray": return .gray
-        default: return .blue
-        }
+        guard let project = project else { return .allProjectColor }
+        return project.swiftUIColor
     }
     
     private var iconName: String {

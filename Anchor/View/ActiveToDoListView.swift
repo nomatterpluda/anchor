@@ -44,6 +44,7 @@ struct ActiveToDoListView: View {
     @EnvironmentObject var activeToDoListViewModel: ActiveToDoListViewModel
     @EnvironmentObject var projectViewModel: ProjectViewModel
     @Environment(\.modelContext) private var context
+    @Environment(\.accentColor) private var accentColor
     @FocusState private var isTaskFieldFocused: Bool
     
     // Remove filteredActiveList since filtering is now handled by Query
@@ -74,11 +75,11 @@ struct ActiveToDoListView: View {
                 }, label: {
                         Image(systemName: activeToDoListViewModel.iconName(isTaskFieldFocused: isTaskFieldFocused))
                             .font(.system(.headline,design: .rounded, weight: .bold))
-                            .foregroundStyle(.blue)
-                            .contentTransition(.symbolEffect(.replace))
+                            .foregroundStyle(accentColor)
+                            .animation(.none, value: accentColor)
                         
                     })
-                TextField("", text: $activeToDoListViewModel.newTaskText, prompt: Text("New To Do").foregroundColor(.blue))
+                TextField("", text: $activeToDoListViewModel.newTaskText, prompt: Text("New To Do").foregroundColor(accentColor))
                             .font(.system(.title2,design: .rounded))
                             .fontWeight(.semibold)
                             .foregroundStyle(.white)

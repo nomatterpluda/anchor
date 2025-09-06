@@ -30,6 +30,7 @@ struct TaskListView: View {
         .listStyle(.insetGrouped)
         .environment(\.defaultMinListRowHeight, 0)
         .animation(.easeInOut(duration: 0.4), value: selectedProject?.projectID)
+        .defaultScrollAnchor(.bottom)
     }
 }
 

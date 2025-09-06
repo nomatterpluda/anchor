@@ -20,6 +20,7 @@ struct ToDoRowView: View {
     @Bindable var todo : Todo
     @FocusState private var isActive: Bool
     @Environment(\.modelContext) private var context
+    @Environment(\.accentColor) private var accentColor
    
     var body: some View {
         HStack (spacing: 12){
@@ -35,8 +36,8 @@ struct ToDoRowView: View {
             }, label: {
                 Image(systemName: todo.isCompleted ? "checkmark.circle.fill" : "circle")
                     .font(.system(.headline,design: .rounded, weight: .bold))
-                    .foregroundStyle(todo.isCompleted ? .blue: .primary.opacity(0.50))
-                    .contentTransition(.symbolEffect(.replace))
+                    .foregroundStyle(todo.isCompleted ? accentColor: .primary.opacity(0.50))
+                    .animation(.none, value: accentColor)
                     
                 })
             TextField("New To Do", text: $todo.taskName)

@@ -23,16 +23,24 @@ struct ProjectFilteredToDoView: View {
                 .ignoresSafeArea(edges: .all)
             
             VStack(spacing: 0) {
-                // Task list
+                // Task list with dynamic accent color
                 taskListView
-                
+                    .environment(\.accentColor, projectSelectionViewModel.selectedProject?.swiftUIColor ?? .allProjectColor)
+                                
                 // Project selector bar at bottom
                 ProjectSelectorBar(
                     projects: projects,
                     viewModel: projectSelectionViewModel
                 )
+                .fixedSize(horizontal: false, vertical: true)
+                .overlay(alignment: .top) {
+                    Rectangle()
+                        .fill(Color.white.opacity(0.1))
+                        .frame(height: 1)
+                }
             }
         }
+        .ignoresSafeArea(edges: [.bottom])
         .onAppear {
             SampleDataService.createSampleProjectsIfNeeded(
                 context: context,
@@ -50,4 +58,8 @@ struct ProjectFilteredToDoView: View {
 
 #Preview {
     ProjectFilteredToDoView()
+        .environmentObject(ActiveToDoListViewModel())
+        .environmentObject(CompletedToDoListViewModel())
+        .environmentObject(ProjectViewModel())
+        .modelContainer(for: [Todo.self, ProjectModel.self])
 }

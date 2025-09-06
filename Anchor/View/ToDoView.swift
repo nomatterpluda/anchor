@@ -19,4 +19,8 @@ struct ToDoView: View {
 
 #Preview {
     ToDoView()
+        .environmentObject(ActiveToDoListViewModel())
+        .environmentObject(CompletedToDoListViewModel())
+        .environmentObject(ProjectViewModel())
+        .modelContainer(for: [Todo.self, ProjectModel.self])
 }
