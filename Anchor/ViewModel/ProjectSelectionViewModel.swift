@@ -30,7 +30,7 @@ class ProjectSelectionViewModel: ObservableObject {
     // Handle project selection with haptic feedback
     func selectProject(_ option: ProjectOption, at index: Int, scrollAction: @escaping (Int) -> Void) {
         // Haptic feedback
-        Haptic.shared.lightImpact()
+        Haptic.shared.softImpact()
         
         // Update scroll position
         scrollPosition = index
@@ -53,7 +53,7 @@ class ProjectSelectionViewModel: ObservableObject {
         
         // Haptic feedback only if position actually changed
         if previousIndex != newIndex {
-            Haptic.shared.lightImpact()
+            Haptic.shared.softImpact()
         }
         
         // Update selected project based on scroll position

@@ -27,6 +27,12 @@ final class Haptic {
         generator.impactOccurred()
     }
     
+    /// Heavy impact feedback - for significant interactions
+    func softImpact() {
+        let generator = UIImpactFeedbackGenerator(style: .soft)
+        generator.impactOccurred()
+    }
+    
     // MARK: - Notification Feedback
     
     /// Success notification feedback - for completed actions

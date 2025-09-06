@@ -2,11 +2,11 @@
  * ProjectSelectorBar.swift
  * 
  * BOTTOM PROJECT SELECTOR COMPONENT
- * - Horizontal scrollable bar with project buttons
+ * - Static project icon on left showing selected project
+ * - Horizontal scrollable project list with names and task counts
  * - Snap-to-left behavior: leftmost visible project is always selected
  * - Smooth scrolling animations and haptic feedback
- * - Fixed-width buttons for consistent pagination
- * - Integrates with ProjectSelectionViewModel for state management
+ * - New layout: VStack → HStack with static icon + scrollable content
  */
 
 import SwiftUI
@@ -24,48 +24,65 @@ struct ProjectSelectorBar: View {
         viewModel.getAllProjectOptions(from: projects)
     }
     
+    private func getActiveTaskCount(for option: ProjectOption) -> Int {
+        if option.name == "All" {
+            return projects.reduce(0) { $0 + $1.activeTodos.count }
+        } else {
+            return projects.first { $0.projectName == option.name }?.activeTodos.count ?? 0
+        }
+    }
+    
     var body: some View {
-        ScrollViewReader { proxy in
-            ScrollView(.horizontal, showsIndicators: false) {
-                LazyHStack(spacing: 12) {
-                    ForEach(Array(allProjectOptions.enumerated()), id: \.offset) { index, option in
-                        ProjectSelectorButton(
-                            name: option.name,
-                            icon: option.icon,
-                            color: option.color,
-                            isSelected: index == (viewModel.scrollPosition ?? 0)
-                        ) {
-                            // Handle selection through ViewModel
-                            viewModel.selectProject(option, at: index) { scrollIndex in
-                                withAnimation(.easeOut(duration: 0.3)) {
-                                    proxy.scrollTo(scrollIndex, anchor: .leading)
+        VStack(spacing: 0) {
+            HStack(spacing: 10) {
+                // Static project icon (left side)
+                StaticProjectIcon(project: viewModel.selectedProject)
+                
+                // Scrollable project list (right side)
+                ScrollViewReader { proxy in
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        LazyHStack(spacing: 20) {
+                            ForEach(Array(allProjectOptions.enumerated()), id: \.offset) { index, option in
+                                ProjectListItem(
+                                    name: option.name,
+                                    activeTaskCount: getActiveTaskCount(for: option),
+                                    isSelected: index == (viewModel.scrollPosition ?? 0)
+                                ) {
+                                    // Handle selection through ViewModel
+                                    viewModel.selectProject(option, at: index) { scrollIndex in
+                                        withAnimation(.easeOut(duration: 0.3)) {
+                                            proxy.scrollTo(scrollIndex, anchor: .leading)
+                                        }
+                                    }
                                 }
+                                .id(index)
                             }
                         }
-                        .frame(width: 160) // Fixed width for consistent snapping
-                        .id(index)
+                        .padding(.leading, 16) // Left padding from icon
+                        .padding(.trailing, 160) // Extra right padding so last item can reach left side
+                    }
+                    .scrollPosition(id: $viewModel.scrollPosition)
+                    .scrollTargetLayout()
+                    .scrollTargetBehavior(.viewAligned)
+                    .onChange(of: viewModel.scrollPosition) { oldValue, newValue in
+                        // Handle scroll position changes through ViewModel
+                        viewModel.handleScrollPositionChange(
+                            newIndex: newValue,
+                            in: allProjectOptions,
+                            previousIndex: oldValue
+                        )
                     }
                 }
-                .padding(.leading, 12) // Left padding from screen edge
-                .padding(.trailing, 12)
             }
-            .scrollPosition(id: $viewModel.scrollPosition)
-            .scrollTargetLayout()
-            .scrollTargetBehavior(.viewAligned)
-            .onChange(of: viewModel.scrollPosition) { oldValue, newValue in
-                // Handle scroll position changes through ViewModel
-                viewModel.handleScrollPositionChange(
-                    newIndex: newValue,
-                    in: allProjectOptions,
-                    previousIndex: oldValue
-                )
-            }
-            .padding(.vertical, 16)
-            .background(
-                Rectangle()
-                    .fill(Color.black.opacity(0.95))
-                    .ignoresSafeArea(edges: .bottom)
-            )
         }
+        .padding(.leading, 32)
+        .padding(.top, 32)
+        .padding(.bottom, 52)
+        .padding(.trailing, 0)
+        .background(
+            Rectangle()
+                .fill(Color.black.opacity(0.95))
+                .ignoresSafeArea(edges: .bottom)
+        )
     }
 }
