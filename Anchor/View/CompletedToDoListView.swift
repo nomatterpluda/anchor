@@ -54,47 +54,50 @@ import SwiftUI
         }
 
       var body: some View {
-          Section(
+          ScrollViewSection(
               content: {
-                  ForEach(filteredCompletedList) { todo in
-                      ToDoRowView(todo: todo)
-                  }
-                  .onDelete { indexSet in
-                      for index in indexSet {
-                          completedToDoListViewModel.deleteTask(todo: filteredCompletedList[index])
+                  VStack(spacing: 0) {
+                      ForEach(filteredCompletedList) { todo in
+                          VStack(spacing: 0) {
+                              SwipeableRowView(
+                                  content: {
+                                      ToDoRowView(todo: todo)
+                                          .padding(.horizontal, 16)
+                                          .padding(.vertical, 8)
+                                  },
+                                  onDelete: {
+                                      completedToDoListViewModel.deleteTask(todo: todo)
+                                  }
+                              )
+                              
+                          }
                       }
                   }
+                  .padding(.bottom, 10)
+                  .transition(.asymmetric(
+                      insertion: .opacity.combined(with: .move(edge: .trailing)),
+                      removal: .opacity.combined(with: .move(edge: .leading))
+                  ))
               },
               header: {
                   HStack {
                       Image(systemName: "checkmark.circle.fill")
-                          .font(.system(.title2, design: .rounded).bold())
-                      Text(completedToDoListViewModel.completedSectionTitle(count: filteredCompletedList.count))
-                          .font(.system(.title, design: .rounded).bold())
+                      Text("Completed")
                       Spacer()
-
+                      
                       if completedToDoListViewModel.showAll {
                           Button("Show Recents") {
                               completedToDoListViewModel.toggleShowAll()
                           }
-                      }
-                  }
-                  .foregroundStyle(.white.opacity(0.25))
-              },
-              footer: {
-                  if completedToDoListViewModel.shouldShowFooter(count: filteredCompletedList.count) {
-                      HStack {
-                          Text("Showing recent 5 Tasks")
-                              .foregroundStyle(Color(.darkGray))
-                          Button("Show all") {
+                      } else {
+                          Button("View all") {
                               completedToDoListViewModel.toggleShowAll()
                           }
                       }
-                      .font(.caption)
                   }
+                  .padding(.top, 10)
               }
           )
-          .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 0))
           .onAppear {
               completedToDoListViewModel.context = context
               completedToDoListViewModel.projectViewModel = projectViewModel
@@ -105,5 +108,9 @@ import SwiftUI
 
   #Preview {
       CompletedToDoListView()
+          .environmentObject(ActiveToDoListViewModel())
+          .environmentObject(CompletedToDoListViewModel())
+          .environmentObject(ProjectViewModel())
+          .modelContainer(for: [Todo.self, ProjectModel.self])
   }
 

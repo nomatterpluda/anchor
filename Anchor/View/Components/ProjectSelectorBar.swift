@@ -75,7 +75,7 @@ struct ProjectSelectorBar: View {
                 }
             }
         }
-        .padding(.leading, 32)
+        .padding(.leading, 16)
         .padding(.top, 32)
         .padding(.bottom, 52)
         .padding(.trailing, 0)

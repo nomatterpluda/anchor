@@ -47,63 +47,79 @@ struct ActiveToDoListView: View {
     @Environment(\.accentColor) private var accentColor
     @FocusState private var isTaskFieldFocused: Bool
     
-    // Remove filteredActiveList since filtering is now handled by Query
-    private var filteredActiveList: [Todo] {
-        return activeList // Query already handles the filtering
-    }
 
    
 
     
     var body: some View {
-        Section {
-          
-            ForEach(filteredActiveList) { todo in
-                ToDoRowView(todo: todo)
-            }
-            .onDelete { indexSet in
-                for index in indexSet {
-                    activeToDoListViewModel.deleteTask(todo: filteredActiveList[index])
-                }
-            }
-            
-            // Input section
-            HStack (spacing: 16){
-                Button(action: {
-                    activeToDoListViewModel.addTask(to: project, dismissFocus: {
-                        isTaskFieldFocused = false
-                    })
-                }, label: {
-                        Image(systemName: activeToDoListViewModel.iconName(isTaskFieldFocused: isTaskFieldFocused))
-                            .font(.system(.headline,design: .rounded, weight: .bold))
-                            .foregroundStyle(accentColor)
-                            .animation(.none, value: accentColor)
-                        
-                    })
-                TextField("", text: $activeToDoListViewModel.newTaskText, prompt: Text("New To Do").foregroundColor(accentColor))
-                            .font(.system(.title2,design: .rounded))
-                            .fontWeight(.semibold)
-                            .foregroundStyle(.white)
-                            .focused($isTaskFieldFocused)
-                            .onSubmit {
+        ScrollViewSection(
+            content: {
+                VStack(spacing: 0) {
+                    // Tasks content with transition
+                    VStack(spacing: 0) {
+                        ForEach(activeList) { todo in
+                            VStack(spacing: 0) {
+                                SwipeableRowView(
+                                    content: {
+                                        ToDoRowView(todo: todo)
+                                            .padding(.horizontal, 16)
+                                            .padding(.vertical, 8)
+                                    },
+                                    onDelete: {
+                                        activeToDoListViewModel.deleteTask(todo: todo)
+                                    }
+                                )
+                                
+                            }
+                        }
+                    }
+                    .transition(.asymmetric(
+                        insertion: .opacity.combined(with: .move(edge: .trailing)),
+                        removal: .opacity.combined(with: .move(edge: .leading))
+                    ))
+                    
+                    
+                    // Input section (no transition - stays stable)
+                    VStack(spacing: 0) {
+                        HStack(spacing: 16) {
+                            Button(action: {
                                 activeToDoListViewModel.addTask(to: project, dismissFocus: {
                                     isTaskFieldFocused = false
                                 })
-                            }
+                            }, label: {
+                                Image(systemName: activeToDoListViewModel.iconName(isTaskFieldFocused: isTaskFieldFocused))
+                                    .font(.system(.headline,design: .rounded, weight: .bold))
+                                    .foregroundStyle(accentColor)
+                                    .animation(.none, value: accentColor)
+                            })
+                            
+                            TextField("", text: $activeToDoListViewModel.newTaskText, prompt: Text("New To Do").foregroundColor(accentColor))
+                                .font(.system(.title2,design: .rounded))
+                                .fontWeight(.semibold)
+                                .foregroundStyle(.white)
+                                .focused($isTaskFieldFocused)
+                                .onSubmit {
+                                    activeToDoListViewModel.addTask(to: project, dismissFocus: {
+                                        isTaskFieldFocused = false
+                                    })
+                                }
+                        }
+                        .padding(.horizontal, 16)
+                        .padding(.top, 8)
+                        .padding(.bottom, 20)
+                        .background(Color(hex: "1C1C1E"))
+                    }
                 }
-           
-     
-        } header: {
-            HStack {
-                Image(systemName: "circle.dotted")
-                    .font(.system(.title2, design: .rounded).bold())
-                Text("\(activeToDoListViewModel.activeSectionTitle(count: activeList.count))")
-                    .font(.system(.title, design: .rounded).bold())
-                Spacer()
-                Button("View all") { }
+            },
+            header: {
+                HStack {
+                    Image(systemName: "circle.dotted")
+                    Text("Tasks")
+                    Spacer()
+                }
+                .padding(.top, 10)
             }
-            .foregroundStyle(.white.opacity(0.25))
-        }
+        )
         .onAppear {
             activeToDoListViewModel.context = context
         }
@@ -112,5 +128,9 @@ struct ActiveToDoListView: View {
 
 #Preview {
     ActiveToDoListView()
+        .environmentObject(ActiveToDoListViewModel())
+        .environmentObject(CompletedToDoListViewModel())
+        .environmentObject(ProjectViewModel())
+        .modelContainer(for: [Todo.self, ProjectModel.self])
     }
 

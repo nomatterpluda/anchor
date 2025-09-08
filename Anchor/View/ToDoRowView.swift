@@ -38,7 +38,6 @@ struct ToDoRowView: View {
                     .font(.system(.headline,design: .rounded, weight: .bold))
                     .foregroundStyle(todo.isCompleted ? accentColor: .primary.opacity(0.50))
                     .animation(.none, value: accentColor)
-                    
                 })
             TextField("New To Do", text: $todo.taskName)
                 .font(.system(.title2,design: .rounded))
@@ -47,7 +46,6 @@ struct ToDoRowView: View {
                 .foregroundStyle(todo.isCompleted ? .white.opacity(0.50): .primary)
                 .focused($isActive)
         }
-        .listRowSeparator(.hidden)
     }
 }
 

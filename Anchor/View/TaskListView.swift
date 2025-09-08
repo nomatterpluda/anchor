@@ -3,6 +3,7 @@
  * 
  * TASK LIST DISPLAY COMPONENT
  * - Displays completed and active todo lists for a selected project
+ * - Uses ScrollView + LazyVStack with bottom anchoring for dual-layer interface
  * - Clean, reusable component with proper styling and animations
  * - Accepts project parameter for filtering tasks
  */
@@ -14,29 +15,16 @@ struct TaskListView: View {
     let selectedProject: ProjectModel?
     
     var body: some View {
-        List {
-            ActiveToDoListView(project: selectedProject)
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                    removal: .opacity.combined(with: .move(edge: .leading))
-                ))
-            
-            CompletedToDoListView(project: selectedProject)
-                .listRowInsets(.init(top: 12, leading: 16, bottom: 12, trailing: 0))
-                .transition(.asymmetric(
-                    insertion: .opacity.combined(with: .move(edge: .trailing)),
-                    removal: .opacity.combined(with: .move(edge: .leading))
-                ))
-
-            
-            
-
-            
+        ScrollView {
+            LazyVStack(spacing: 10) {
+                CompletedToDoListView(project: selectedProject)
+                ActiveToDoListView(project: selectedProject)
+            }
+            .padding(.bottom, 20) // Extra padding at bottom
         }
-        .listStyle(.insetGrouped)
-        .environment(\.defaultMinListRowHeight, 0)
-        .animation(.easeInOut(duration: 0.4), value: selectedProject?.projectID)
-
+       // .animation(.snappy, value: selectedProject?.projectID)
+        .defaultScrollAnchor(.bottom)
+        
     }
 }
 

@@ -21,11 +21,11 @@ struct ProjectListItem: View {
         Button(action: action) {
             HStack(alignment: .bottom, spacing: 5) {
                 Text(name)
-                    .font(.system(size: 34, weight: .bold))
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(isSelected ? .white : .white.opacity(0.2))
                 
                 Text("\(activeTaskCount)")
-                    .font(.system(size: 20, weight: .medium))
+                    .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundStyle(isSelected ? .white.opacity(0.4) : .white.opacity(0.2))
             }
         }
