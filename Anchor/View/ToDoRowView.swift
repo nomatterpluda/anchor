@@ -26,9 +26,11 @@ struct ToDoRowView: View {
         HStack (spacing: 12){
             Button(action: {
                 if todo.isCompleted {
-                    Haptic.shared.lightImpact()
+                    // Unchecking completed task
+                    Haptic.shared.warning()
                 } else {
-                    Haptic.shared.mediumImpact()
+                    // Marking task as completed - success!
+                    Haptic.shared.success()
                 }
                 
                 todo.isCompleted.toggle()

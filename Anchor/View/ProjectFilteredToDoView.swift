@@ -17,6 +17,11 @@ struct ProjectFilteredToDoView: View {
     @StateObject private var projectSelectionViewModel = ProjectSelectionViewModel()
     @Environment(\.modelContext) private var context
     
+    // Menu State
+    @State private var isMenuPresented = false
+    // Track if user is typing
+    @FocusState private var isAnyTextFieldFocused: Bool
+    
     var body: some View {
         ZStack {
             Color.black
@@ -26,21 +31,42 @@ struct ProjectFilteredToDoView: View {
                 // Task list with dynamic accent color
                 taskListView
                     .environment(\.accentColor, projectSelectionViewModel.selectedProject?.swiftUIColor ?? .allProjectColor)
+                    .focused($isAnyTextFieldFocused)
                                 
-                // Project selector bar at bottom
-                ProjectSelectorBar(
-                    projects: projects,
-                    viewModel: projectSelectionViewModel
-                )
-                .fixedSize(horizontal: false, vertical: true)
-                .overlay(alignment: .top) {
-                    Rectangle()
-                        .fill(Color.white.opacity(0.1))
-                        .frame(height: 1)
+                // Project selector bar at bottom - hide when typing
+                if !isAnyTextFieldFocused {
+                    ProjectSelectorBar(
+                        projects: projects,
+                        viewModel: projectSelectionViewModel,
+                        isMenuPresented: $isMenuPresented
+                    )
+                    .fixedSize(horizontal: false, vertical: true)
+                    .overlay(alignment: .top) {
+                        Rectangle()
+                            .fill(Color.white.opacity(0.1))
+                            .frame(height: 1)
+                    }
+                    .transition(.move(edge: .bottom).combined(with: .opacity))
+                    
+                    // Menu appears here, pushing everything up
+                    if isMenuPresented {
+                        ProjectMenuView(
+                            isPresented: $isMenuPresented,
+                            project: projectSelectionViewModel.selectedProject
+                        )
+                        .transition(.move(edge: .bottom).combined(with: .opacity))
+                    }
+                }
+            }
+            .animation(.snappy(duration: 0.3), value: isMenuPresented)
+            .animation(.snappy, value: isAnyTextFieldFocused)
+            .onChange(of: isAnyTextFieldFocused) { _, isFocused in
+                if isFocused && isMenuPresented {
+                    // Dismiss menu when user starts typing
+                    isMenuPresented = false
                 }
             }
         }
-        .ignoresSafeArea(edges: [.bottom])
         .onAppear {
             SampleDataService.createSampleProjectsIfNeeded(
                 context: context,

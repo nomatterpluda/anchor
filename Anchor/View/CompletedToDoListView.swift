@@ -54,55 +54,62 @@ import SwiftUI
         }
 
       var body: some View {
-          ScrollViewSection(
-              content: {
-                  VStack(spacing: 0) {
-                      ForEach(filteredCompletedList) { todo in
-                          VStack(spacing: 0) {
-                              SwipeableRowView(
-                                  content: {
-                                      ToDoRowView(todo: todo)
-                                          .padding(.horizontal, 16)
-                                          .padding(.vertical, 8)
-                                  },
-                                  onDelete: {
-                                      completedToDoListViewModel.deleteTask(todo: todo)
+          // Only show section if there are completed tasks
+          if !completedList.isEmpty {
+              ScrollViewSection(
+                  content: {
+                      VStack(spacing: 0) {
+                          ForEach(filteredCompletedList) { todo in
+                              VStack(spacing: 0) {
+                                  SwipeableRowView(
+                                      content: {
+                                          ToDoRowView(todo: todo)
+                                              .padding(.horizontal, 16)
+                                              .padding(.vertical, 8)
+                                      },
+                                      onDelete: {
+                                          completedToDoListViewModel.deleteTask(todo: todo)
+                                      }
+                                  )
+                                  
+                              }
+                          }
+                      }
+                      .padding(.bottom, 10)
+                      .transition(.asymmetric(
+                          insertion: .opacity.combined(with: .move(edge: .trailing)),
+                          removal: .opacity.combined(with: .move(edge: .leading))
+                      ))
+                  },
+                  header: {
+                      HStack {
+                          Image(systemName: "checkmark.circle.fill")
+                          Text("Completed")
+                          Spacer()
+                          
+                          // Only show "View all" button if more than 5 completed tasks
+                          if completedList.count > 5 {
+                              if completedToDoListViewModel.showAll {
+                                  Button("Show Recents") {
+                                      completedToDoListViewModel.toggleShowAll()
                                   }
-                              )
-                              
+                              } else {
+                                  Button("View all") {
+                                      completedToDoListViewModel.toggleShowAll()
+                                  }
+                              }
                           }
                       }
+                      .padding(.top, 10)
                   }
-                  .padding(.bottom, 10)
-                  .transition(.asymmetric(
-                      insertion: .opacity.combined(with: .move(edge: .trailing)),
-                      removal: .opacity.combined(with: .move(edge: .leading))
-                  ))
-              },
-              header: {
-                  HStack {
-                      Image(systemName: "checkmark.circle.fill")
-                      Text("Completed")
-                      Spacer()
-                      
-                      if completedToDoListViewModel.showAll {
-                          Button("Show Recents") {
-                              completedToDoListViewModel.toggleShowAll()
-                          }
-                      } else {
-                          Button("View all") {
-                              completedToDoListViewModel.toggleShowAll()
-                          }
-                      }
-                  }
-                  .padding(.top, 10)
+              )
+              .onAppear {
+                  completedToDoListViewModel.context = context
+                  completedToDoListViewModel.projectViewModel = projectViewModel
               }
-          )
-          .onAppear {
-              completedToDoListViewModel.context = context
-              completedToDoListViewModel.projectViewModel = projectViewModel
+              .id(completedToDoListViewModel.showAll) // This forces view recreation when showAll changes
+              .transition(.opacity.combined(with: .move(edge: .top)))
           }
-          .id(completedToDoListViewModel.showAll) // This forces view recreation when showAll changes
       }
   }
 

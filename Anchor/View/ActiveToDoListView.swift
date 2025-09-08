@@ -83,6 +83,7 @@ struct ActiveToDoListView: View {
                     VStack(spacing: 0) {
                         HStack(spacing: 16) {
                             Button(action: {
+                                Haptic.shared.softImpact()
                                 activeToDoListViewModel.addTask(to: project, dismissFocus: {
                                     isTaskFieldFocused = false
                                 })
@@ -99,6 +100,7 @@ struct ActiveToDoListView: View {
                                 .foregroundStyle(.white)
                                 .focused($isTaskFieldFocused)
                                 .onSubmit {
+                                    Haptic.shared.softImpact()
                                     activeToDoListViewModel.addTask(to: project, dismissFocus: {
                                         isTaskFieldFocused = false
                                     })

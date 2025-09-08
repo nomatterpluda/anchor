@@ -92,7 +92,7 @@ struct SwipeableRowView<Content: View>: View {
                 HStack {
                     Image(systemName: "circle")
                         .font(.headline)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.white)
                     
                     Text("Swipe me left to delete")
                         .font(.title2)

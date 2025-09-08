@@ -19,6 +19,9 @@ struct ProjectSelectorBar: View {
     // ViewModel
     @ObservedObject var viewModel: ProjectSelectionViewModel
     
+    // Menu State (passed from parent)
+    @Binding var isMenuPresented: Bool
+    
     // Computed Properties
     private var allProjectOptions: [ProjectOption] {
         viewModel.getAllProjectOptions(from: projects)
@@ -35,10 +38,16 @@ struct ProjectSelectorBar: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
-                // Static project icon (left side)
+                // Static project icon (left side) - tappable
                 StaticProjectIcon(project: viewModel.selectedProject)
+                    .onTapGesture {
+                        Haptic.shared.lightImpact()
+                        withAnimation(.snappy) {
+                            isMenuPresented.toggle()
+                        }
+                    }
                 
-                // Scrollable project list (right side)
+                // Scrollable project list (right side) - fade non-selected when menu open
                 ScrollViewReader { proxy in
                     ScrollView(.horizontal, showsIndicators: false) {
                         LazyHStack(spacing: 20) {
@@ -48,24 +57,33 @@ struct ProjectSelectorBar: View {
                                     activeTaskCount: getActiveTaskCount(for: option),
                                     isSelected: index == (viewModel.scrollPosition ?? 0)
                                 ) {
-                                    // Handle selection through ViewModel
-                                    viewModel.selectProject(option, at: index) { scrollIndex in
-                                        withAnimation(.easeOut(duration: 0.3)) {
-                                            proxy.scrollTo(scrollIndex, anchor: .leading)
+                                    // If this is the selected project, toggle menu instead of selecting
+                                    if index == (viewModel.scrollPosition ?? 0) {
+                                        Haptic.shared.lightImpact()
+                                        withAnimation(.snappy) {
+                                            isMenuPresented.toggle()
+                                        }
+                                    } else {
+                                        // Handle selection through ViewModel  
+                                        viewModel.selectProject(option, at: index) { scrollIndex in
+                                            withAnimation(.easeOut(duration: 0.3)) {
+                                                proxy.scrollTo(scrollIndex, anchor: .leading)
+                                            }
                                         }
                                     }
                                 }
+                                .opacity(isMenuPresented && index != (viewModel.scrollPosition ?? 0) ? 0.0 : 1.0)
+                                .allowsHitTesting(!(isMenuPresented && index != (viewModel.scrollPosition ?? 0)))
                                 .id(index)
                             }
                         }
-                        .padding(.leading, 16) // Left padding from icon
-                        .padding(.trailing, 160) // Extra right padding so last item can reach left side
+                        .padding(.leading, 16)
+                        .padding(.trailing, 160)
                     }
                     .scrollPosition(id: $viewModel.scrollPosition)
                     .scrollTargetLayout()
                     .scrollTargetBehavior(.viewAligned)
                     .onChange(of: viewModel.scrollPosition) { oldValue, newValue in
-                        // Handle scroll position changes through ViewModel
                         viewModel.handleScrollPositionChange(
                             newIndex: newValue,
                             in: allProjectOptions,
@@ -77,7 +95,7 @@ struct ProjectSelectorBar: View {
         }
         .padding(.leading, 16)
         .padding(.top, 32)
-        .padding(.bottom, 52)
+        .padding(.bottom, isMenuPresented ? 20 : 20)
         .padding(.trailing, 0)
         .background(
             Rectangle()

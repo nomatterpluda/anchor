@@ -24,6 +24,7 @@ struct TaskListView: View {
         }
        // .animation(.snappy, value: selectedProject?.projectID)
         .defaultScrollAnchor(.bottom)
+        .scrollDismissesKeyboard(.interactively)
         
     }
 }
