@@ -20,7 +20,17 @@ class ProjectSelectionViewModel: ObservableObject {
     @Published var showProjectMenu: Bool = false
     @Published var isCreatingProject: Bool = false
     
+    // Over-scroll properties
+    @Published var overScrollProgress: CGFloat = 0
+    @Published var showNewProjectSheet: Bool = false
+    @Published var isThresholdReached: Bool = false
+    
     var context: ModelContext?
+    
+    // Private state for haptic management
+    private var isContinuousHapticActive: Bool = false
+    private var hasTriggeredThresholdHaptic: Bool = false
+    private let overScrollThreshold: CGFloat = 200
     
     // MARK: - Project Selection Logic
     
@@ -113,6 +123,99 @@ class ProjectSelectionViewModel: ObservableObject {
         
         // Tasks will be cascade deleted based on model relationship
         context.delete(project)
+    }
+    
+    // MARK: - Over-Scroll Logic
+    
+    // Handle scroll offset changes for over-scroll detection
+    func handleScrollOffset(_ dragDistance: CGFloat) {
+        // Debug print to see if we're getting drag events
+        print("📍 Drag distance: \(dragDistance)")
+        
+        // Use drag distance directly as over-scroll amount
+        overScrollProgress = max(0, dragDistance)
+        
+        print("🎯 Over-scroll amount: \(overScrollProgress)")
+        
+        // Handle continuous haptic feedback
+        handleContinuousHaptics(for: overScrollProgress)
+    }
+    
+    // Handle scroll gesture end
+    func handleScrollEnd() {
+        if overScrollProgress >= overScrollThreshold {
+            // Threshold reached - show sheet
+            showNewProjectSheet = true
+            Haptic.shared.success()
+        }
+        resetOverScroll()
+    }
+    
+    // Reset over-scroll state
+    func resetOverScroll() {
+        overScrollProgress = 0
+        isThresholdReached = false
+        hasTriggeredThresholdHaptic = false
+        // Stop continuous haptic when gesture ends
+        if isContinuousHapticActive {
+            Haptic.shared.stopContinuousHaptic()
+            isContinuousHapticActive = false
+        }
+    }
+    
+    // Handle continuous haptic feedback with rising tension
+    private func handleContinuousHaptics(for overScroll: CGFloat) {
+        if overScroll > 0 && overScroll < overScrollThreshold {
+            // Continuous ramp from 0 to 200px
+            if !isContinuousHapticActive {
+                Haptic.shared.startContinuousHaptic()
+                isContinuousHapticActive = true
+                hasTriggeredThresholdHaptic = false
+            }
+            
+            // Ensure threshold state is false when under threshold
+            if isThresholdReached {
+                isThresholdReached = false
+            }
+            
+            // Map progress = clamp(overscroll / 200, 0, 1)
+            let progress = min(overScroll / overScrollThreshold, 1.0)
+            
+            print("🎯 Continuous haptic - Progress: \(String(format: "%.2f", progress))")
+            
+            // Update continuous haptic with rising tension
+            Haptic.shared.updateContinuousHaptic(progress: progress)
+            
+        } else if overScroll >= overScrollThreshold {
+            // User passed 200px threshold - signal and stop continuous haptic
+            if !hasTriggeredThresholdHaptic {
+                // Stop continuous haptic
+                if isContinuousHapticActive {
+                    Haptic.shared.stopContinuousHaptic()
+                    isContinuousHapticActive = false
+                }
+                
+                // Strong confirmation haptic to signal threshold crossed
+                Haptic.shared.heavyImpact()
+                hasTriggeredThresholdHaptic = true
+                
+                print("🎯 Threshold crossed! Heavy haptic triggered")
+            }
+            
+            // Set threshold reached state for visual feedback
+            if !isThresholdReached {
+                isThresholdReached = true
+            }
+            
+        } else {
+            // Stop continuous haptic when no over-scroll
+            if isContinuousHapticActive {
+                Haptic.shared.stopContinuousHaptic()
+                isContinuousHapticActive = false
+            }
+            hasTriggeredThresholdHaptic = false
+            isThresholdReached = false
+        }
     }
     
     // MARK: - Helper Methods

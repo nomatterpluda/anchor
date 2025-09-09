@@ -43,7 +43,10 @@ struct ProjectSelectorBar: View {
         VStack(spacing: 0) {
             HStack(spacing: 10) {
                 // Static project icon (left side) - tappable
-                StaticProjectIcon(project: viewModel.selectedProject)
+                StaticProjectIcon(
+                    project: viewModel.selectedProject,
+                    isThresholdReached: viewModel.isThresholdReached
+                )
                     .onTapGesture {
                         Haptic.shared.lightImpact()
                         withAnimation(.snappy) {
@@ -87,6 +90,23 @@ struct ProjectSelectorBar: View {
                     .scrollPosition(id: $viewModel.scrollPosition)
                     .scrollTargetLayout()
                     .scrollTargetBehavior(.viewAligned)
+                    .simultaneousGesture(
+                        DragGesture()
+                            .onChanged { value in
+                                // Only detect over-scroll when we're at the first item (position 0)
+                                // Position 0 is "All" - over-scroll creates new project
+                                guard viewModel.scrollPosition == 0 else { return }
+                                
+                                // Check if dragging right (positive translation = scrolling left)
+                                let dragDistance = value.translation.width
+                                if dragDistance > 0 {
+                                    viewModel.handleScrollOffset(dragDistance)
+                                }
+                            }
+                            .onEnded { value in
+                                viewModel.handleScrollEnd()
+                            }
+                    )
                     .onChange(of: viewModel.scrollPosition) { oldValue, newValue in
                         viewModel.handleScrollPositionChange(
                             newIndex: newValue,
@@ -106,5 +126,8 @@ struct ProjectSelectorBar: View {
                 .fill(Color.black.opacity(0.95))
                 .ignoresSafeArea(edges: .bottom)
         )
+        .sheet(isPresented: $viewModel.showNewProjectSheet) {
+            AddProjectSheet(viewModel: viewModel)
+        }
     }
 }

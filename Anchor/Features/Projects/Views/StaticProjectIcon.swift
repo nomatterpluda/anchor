@@ -13,6 +13,7 @@ import SwiftUI
 
 struct StaticProjectIcon: View {
     let project: ProjectModel?
+    let isThresholdReached: Bool
     
     private var iconColor: Color {
         // Handle "All" project case (nil) - use gray as default
@@ -21,9 +22,19 @@ struct StaticProjectIcon: View {
     }
     
     private var iconName: String {
+        // Show plus when threshold is reached
+        if isThresholdReached {
+            return "plus"
+        }
+        
         // Handle "All" project case (nil) - use tray.fill as default
         // Otherwise use the stored projectIcon from the model
         return project?.projectIcon ?? "tray.fill"
+    }
+    
+    private var iconScale: Double {
+        // Make plus icon slightly larger for better visibility
+        return isThresholdReached ? 1.3 : 1.1
     }
     
     var body: some View {
@@ -35,13 +46,14 @@ struct StaticProjectIcon: View {
                 Image(systemName: iconName)
                     .font(.system(size: 18, weight: .bold))
                     .foregroundStyle(.white)
-                    .scaleEffect(1.1)
+                    .scaleEffect(iconScale)
                     .animation(.snappy(duration: 0.3), value: iconName)
+                    .animation(.snappy(duration: 0.2), value: iconScale)
             )
     }
 }
 
 #Preview {
-    StaticProjectIcon(project: nil)
+    StaticProjectIcon(project: nil, isThresholdReached: false)
         .background(.black)
 }
