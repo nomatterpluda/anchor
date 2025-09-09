@@ -50,9 +50,12 @@ struct AddProjectSheet: View {
                 bottomButtonsSection
                     .padding(.top, 20)
             }
-            .padding(.horizontal, 20)
-            .padding(.vertical, 30)
         }
+        .background(.clear)
+        .padding(30)
+        .presentationDetents([.height(500), .large])
+        .presentationBackground(.clear)
+        .presentationDragIndicator(.hidden)
         .ignoresSafeArea(.keyboard, edges: .bottom)
     }
     

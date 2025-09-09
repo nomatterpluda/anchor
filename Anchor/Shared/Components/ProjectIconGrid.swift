@@ -63,7 +63,19 @@ struct ProjectIconGrid: View {
             }
             .padding(.vertical, 4)
         }
-        .frame(maxHeight: 3 * (44 + spacing) - spacing) // Limit to 3 rows: 3 * (icon height + spacing) - last spacing
+        .frame(maxHeight: 3 * (44 + spacing) - spacing + 35) // 3 full rows + more of 4th row visible (35px = ~80% of icon height)
+        .mask(
+            LinearGradient(
+                gradient: Gradient(stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: .black, location: 0.05),
+                    .init(color: .black, location: 0.95),
+                    .init(color: .clear, location: 1)
+                ]),
+                startPoint: .top,
+                endPoint: .bottom
+            )
+        )
     }
 }
 

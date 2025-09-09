@@ -127,9 +127,7 @@ struct ProjectSelectorBar: View {
                 .ignoresSafeArea(edges: .bottom)
         )
         .sheet(isPresented: $viewModel.showNewProjectSheet) {
-            DynamicSheet(animation: .smooth(duration: 0.3, extraBounce: 0)) {
-                AddProjectSheet(viewModel: viewModel)
-            }
+            AddProjectSheet(viewModel: viewModel)
         }
         .ignoresSafeArea(.keyboard)
     }

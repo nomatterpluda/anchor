@@ -39,8 +39,20 @@ struct ProjectColorPicker: View {
                     }
                 }
             }
-            .padding(.leading, 20)
+            .padding(.leading, 15)
         }
+        .mask(
+            LinearGradient(
+                gradient: Gradient(stops: [
+                    .init(color: .clear, location: 0),
+                    .init(color: .black, location: 0.03),
+                    .init(color: .black, location: 0.95),
+                    .init(color: .clear, location: 1)
+                ]),
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+        )
     }
 }
 
