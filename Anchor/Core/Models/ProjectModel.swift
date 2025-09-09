@@ -55,9 +55,4 @@ class ProjectModel {
          allProject.projectID = "all-project-default" // Fixed ID for the All project
          return allProject
      }
-
-
-
-    
-    
 }
