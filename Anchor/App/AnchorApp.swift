@@ -15,7 +15,6 @@ struct AnchorApp: App {
     
     @StateObject var activeToDoListViewModel: ActiveToDoListViewModel = ActiveToDoListViewModel()
     @StateObject var completedToDoListViewModel: CompletedToDoListViewModel = CompletedToDoListViewModel()
-    @StateObject var projectViewModel: ProjectViewModel = ProjectViewModel()
     
     var body: some Scene {
         WindowGroup {
@@ -24,7 +23,6 @@ struct AnchorApp: App {
         }
         .environmentObject(activeToDoListViewModel)
         .environmentObject(completedToDoListViewModel)
-        .environmentObject(projectViewModel)
     }
 }
 

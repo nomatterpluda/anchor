@@ -19,7 +19,7 @@ struct ProjectListItem: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(alignment: .bottom, spacing: 5) {
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
                 Text(name)
                     .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(isSelected ? .white : .white.opacity(0.2))
@@ -27,6 +27,8 @@ struct ProjectListItem: View {
                 Text("\(activeTaskCount)")
                     .font(.system(size: 20, weight: .medium, design: .rounded))
                     .foregroundStyle(isSelected ? .white.opacity(0.4) : .white.opacity(0.2))
+                    .contentTransition(.numericText())
+                    .animation(.snappy, value: activeTaskCount)
             }
         }
         .buttonStyle(PlainButtonStyle())

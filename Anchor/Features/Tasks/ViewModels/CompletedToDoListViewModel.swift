@@ -6,8 +6,7 @@ internal import Combine
 class CompletedToDoListViewModel: ObservableObject {
 
     // Published Properties
-    @Published var showAll: Bool = false
-    @Published var projectViewModel: ProjectViewModel?  
+    @Published var showAll: Bool = false  
 
     var context: ModelContext?
 

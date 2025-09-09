@@ -18,7 +18,6 @@ import SwiftUI
       @Query private var completedList: [Todo]
       let project: ProjectModel? // nil means "All" projects
       @EnvironmentObject var completedToDoListViewModel: CompletedToDoListViewModel
-      @EnvironmentObject var projectViewModel: ProjectViewModel
       @Environment(\.modelContext) private var context
 
       init(project: ProjectModel? = nil) {
@@ -105,7 +104,6 @@ import SwiftUI
               )
               .onAppear {
                   completedToDoListViewModel.context = context
-                  completedToDoListViewModel.projectViewModel = projectViewModel
               }
               .id(completedToDoListViewModel.showAll) // This forces view recreation when showAll changes
               .transition(.opacity.combined(with: .move(edge: .top)))
@@ -117,7 +115,6 @@ import SwiftUI
       CompletedToDoListView()
           .environmentObject(ActiveToDoListViewModel())
           .environmentObject(CompletedToDoListViewModel())
-          .environmentObject(ProjectViewModel())
           .modelContainer(for: [Todo.self, ProjectModel.self])
   }
 

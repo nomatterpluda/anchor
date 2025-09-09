@@ -21,6 +21,5 @@ struct ToDoView: View {
     ToDoView()
         .environmentObject(ActiveToDoListViewModel())
         .environmentObject(CompletedToDoListViewModel())
-        .environmentObject(ProjectViewModel())
         .modelContainer(for: [Todo.self, ProjectModel.self])
 }

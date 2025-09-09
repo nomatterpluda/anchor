@@ -42,7 +42,6 @@ struct ActiveToDoListView: View {
     
     //View Properties
     @EnvironmentObject var activeToDoListViewModel: ActiveToDoListViewModel
-    @EnvironmentObject var projectViewModel: ProjectViewModel
     @Environment(\.modelContext) private var context
     @Environment(\.accentColor) private var accentColor
     @FocusState private var isTaskFieldFocused: Bool
@@ -132,7 +131,6 @@ struct ActiveToDoListView: View {
     ActiveToDoListView()
         .environmentObject(ActiveToDoListViewModel())
         .environmentObject(CompletedToDoListViewModel())
-        .environmentObject(ProjectViewModel())
         .modelContainer(for: [Todo.self, ProjectModel.self])
     }
 

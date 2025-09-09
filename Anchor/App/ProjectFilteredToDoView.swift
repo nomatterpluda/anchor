@@ -72,6 +72,7 @@ struct ProjectFilteredToDoView: View {
                 context: context,
                 projects: projects
             )
+            projectSelectionViewModel.context = context
             projectSelectionViewModel.initializeDefaultState()
         }
     }
@@ -86,6 +87,5 @@ struct ProjectFilteredToDoView: View {
     ProjectFilteredToDoView()
         .environmentObject(ActiveToDoListViewModel())
         .environmentObject(CompletedToDoListViewModel())
-        .environmentObject(ProjectViewModel())
         .modelContainer(for: [Todo.self, ProjectModel.self])
 }

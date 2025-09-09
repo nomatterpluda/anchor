@@ -22,16 +22,20 @@ struct ProjectSelectorBar: View {
     // Menu State (passed from parent)
     @Binding var isMenuPresented: Bool
     
+    // Direct query for todos to ensure reactivity
+    @Query(filter: #Predicate<Todo> { !$0.isCompleted }) private var activeTodos: [Todo]
+    
     // Computed Properties
     private var allProjectOptions: [ProjectOption] {
         viewModel.getAllProjectOptions(from: projects)
     }
     
     private func getActiveTaskCount(for option: ProjectOption) -> Int {
-        if option.name == "All" {
-            return projects.reduce(0) { $0 + $1.activeTodos.count }
-        } else {
-            return projects.first { $0.projectName == option.name }?.activeTodos.count ?? 0
+        switch option {
+        case .all:
+            return activeTodos.count
+        case .project(let projectModel):
+            return activeTodos.filter { $0.project?.projectID == projectModel.projectID }.count
         }
     }
     
@@ -64,7 +68,7 @@ struct ProjectSelectorBar: View {
                                             isMenuPresented.toggle()
                                         }
                                     } else {
-                                        // Handle selection through ViewModel  
+                                        // Handle selection through ViewModel
                                         viewModel.selectProject(option, at: index) { scrollIndex in
                                             withAnimation(.easeOut(duration: 0.3)) {
                                                 proxy.scrollTo(scrollIndex, anchor: .leading)

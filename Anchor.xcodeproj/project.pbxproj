@@ -11,7 +11,7 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
-		018B742C2E60DB8F00F726A7 /* Anchor */ = {
+		01EFCC992E701F3C009C8539 /* Anchor */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = Anchor;
 			sourceTree = "<group>";
@@ -32,7 +32,7 @@
 		018B74212E60DB8F00F726A7 = {
 			isa = PBXGroup;
 			children = (
-				018B742C2E60DB8F00F726A7 /* Anchor */,
+				01EFCC992E701F3C009C8539 /* Anchor */,
 				018B742B2E60DB8F00F726A7 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -61,7 +61,7 @@
 			dependencies = (
 			);
 			fileSystemSynchronizedGroups = (
-				018B742C2E60DB8F00F726A7 /* Anchor */,
+				01EFCC992E701F3C009C8539 /* Anchor */,
 			);
 			name = Anchor;
 			packageProductDependencies = (

@@ -17,6 +17,10 @@ class ProjectSelectionViewModel: ObservableObject {
     // Published Properties
     @Published var selectedProject: ProjectModel?
     @Published var scrollPosition: Int? = 0
+    @Published var showProjectMenu: Bool = false
+    @Published var isCreatingProject: Bool = false
+    
+    var context: ModelContext?
     
     // MARK: - Project Selection Logic
     
@@ -64,5 +68,68 @@ class ProjectSelectionViewModel: ObservableObject {
     func initializeDefaultState() {
         selectedProject = nil // Start with "All"
         scrollPosition = 0
+    }
+    
+    // MARK: - Project Management (from ProjectViewModel)
+    
+    // Check if we're viewing "All" projects
+    var isViewingAllProjects: Bool {
+        return selectedProject == nil
+    }
+    
+    // Get display name for current view
+    var currentProjectDisplayName: String {
+        return selectedProject?.projectName ?? "All"
+    }
+    
+    // Create a new project
+    func createProject(name: String, icon: String = "folder.fill", color: String = "blue") {
+        guard let context = context else { return }
+        
+        // Get current project count for ordering
+        let projectCount = getAllProjects().count
+        
+        let newProject = ProjectModel(
+            name: name,
+            icon: icon,
+            color: color,
+            orderIndex: projectCount
+        )
+        
+        context.insert(newProject)
+        
+        // Auto-select the new project
+        selectedProject = newProject
+    }
+    
+    // Delete a project (and reassign its tasks to nil/All)
+    func deleteProject(_ project: ProjectModel) {
+        guard let context = context else { return }
+        
+        // If deleting current project, switch to "All"
+        if selectedProject?.projectID == project.projectID {
+            selectedProject = nil
+        }
+        
+        // Tasks will be cascade deleted based on model relationship
+        context.delete(project)
+    }
+    
+    // MARK: - Helper Methods
+    
+    // Get all projects sorted by order
+    private func getAllProjects() -> [ProjectModel] {
+        guard let context = context else { return [] }
+        
+        let descriptor = FetchDescriptor<ProjectModel>(
+            sortBy: [SortDescriptor(\.orderIndex, order: .forward)]
+        )
+        
+        do {
+            return try context.fetch(descriptor)
+        } catch {
+            print("Error fetching projects: \(error)")
+            return []
+        }
     }
 }

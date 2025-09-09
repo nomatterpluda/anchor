@@ -7,7 +7,6 @@ class ActiveToDoListViewModel: ObservableObject {
     
     // View Properties
     @Published var newTaskText: String = ""
-    @Published var projectViewModel: ProjectViewModel?
     
     var context: ModelContext?
     
@@ -30,12 +29,8 @@ class ActiveToDoListViewModel: ObservableObject {
         if !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
             let newToDo = Todo(taskName: newTaskText.trimmingCharacters(in: .whitespacesAndNewlines))
             
-            // Use provided project or fall back to current project from projectViewModel
-            if let project = project {
-                newToDo.project = project
-            } else if let currentProject = projectViewModel?.currentProject {
-                newToDo.project = currentProject
-            }
+            // Use provided project (will be passed from calling view)
+            newToDo.project = project
             
             context?.insert(newToDo)
             newTaskText = ""
