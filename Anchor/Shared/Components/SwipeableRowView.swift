@@ -45,8 +45,11 @@ struct SwipeableRowView<Content: View>: View {
             content
                 .background(Color(hex: "1C1C1E"))
                 .offset(x: offset)
+                .onTapGesture {
+                    // Empty tap gesture - prevents scroll hijacking (documented SwiftUI fix)
+                }
                 .gesture(
-                    DragGesture()
+                    DragGesture(minimumDistance: 20)
                         .onChanged { value in
                             // Only allow left swipe (negative translation)
                             if value.translation.width < 0 {
