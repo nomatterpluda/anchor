@@ -73,10 +73,7 @@ struct ProjectFilteredToDoView: View {
                 projects: projects
             )
             projectSelectionViewModel.context = context
-            projectSelectionViewModel.initializeDefaultState()
-            
-            // Set scroll position to "All" (first position)
-            projectSelectionViewModel.scrollPosition = 0
+            projectSelectionViewModel.initializeDefaultState(with: projects)
         }
     }
     

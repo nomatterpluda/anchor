@@ -34,10 +34,10 @@ class ProjectSelectionViewModel: ObservableObject {
     
     // MARK: - Project Selection Logic
     
-    // Get combined array of all project options (All + Projects)
+    // Get combined array of all project options (Projects + All)
     func getAllProjectOptions(from projects: [ProjectModel]) -> [ProjectOption] {
-        var options = [ProjectOption.all]
-        options.append(contentsOf: projects.map { ProjectOption.project($0) })
+        var options = projects.map { ProjectOption.project($0) }
+        options.append(ProjectOption.all)
         return options
     }
     
@@ -75,8 +75,13 @@ class ProjectSelectionViewModel: ObservableObject {
     }
     
     // Initialize with default state
-    func initializeDefaultState() {
-        selectedProject = nil // Start with "All"
+    func initializeDefaultState(with projects: [ProjectModel]) {
+        // Start with first project if available, otherwise "All"
+        if let firstProject = projects.first {
+            selectedProject = firstProject
+        } else {
+            selectedProject = nil // "All" when no projects exist
+        }
         scrollPosition = 0
     }
     
@@ -96,14 +101,20 @@ class ProjectSelectionViewModel: ObservableObject {
     func createProject(name: String, icon: String = "folder.fill", color: String = "blue") {
         guard let context = context else { return }
         
-        // Get current project count for ordering
-        let projectCount = getAllProjects().count
+        // Get all existing projects
+        let existingProjects = getAllProjects()
         
+        // Increment orderIndex of all existing projects to make room at position 0
+        for project in existingProjects {
+            project.orderIndex += 1
+        }
+        
+        // Create new project at position 0
         let newProject = ProjectModel(
             name: name,
             icon: icon,
             color: color,
-            orderIndex: projectCount
+            orderIndex: 0
         )
         
         context.insert(newProject)

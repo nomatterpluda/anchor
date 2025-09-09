@@ -44,7 +44,7 @@ struct StaticProjectIcon: View {
             .animation(.snappy(duration: 0.3), value: iconColor)
             .overlay(
                 Image(systemName: iconName)
-                    .font(.system(size: 18, weight: .bold))
+                    .font(.system(size: 16, weight: .bold))
                     .foregroundStyle(.white)
                     .scaleEffect(iconScale)
                     .animation(.snappy(duration: 0.3), value: iconName)

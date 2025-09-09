@@ -23,20 +23,10 @@ extension EnvironmentValues {
 
 // MARK: - ProjectModel Color Extension
 extension ProjectModel {
-    /// Converts project color string to SwiftUI Color
+    /// Converts project color string to SwiftUI Color using iOS 26 system colors
     /// Used by both StaticProjectIcon and todo list accent colors
     var swiftUIColor: Color {
-        switch projectColor {
-        case "blue": return .blue
-        case "green": return .green
-        case "orange": return .orange
-        case "red": return .red
-        case "purple": return .purple
-        case "yellow": return .yellow
-        case "pink": return .pink
-        case "gray": return .gray
-        default: return .blue
-        }
+        return ProjectColors.swiftUIColor(for: projectColor)
     }
 }
 
