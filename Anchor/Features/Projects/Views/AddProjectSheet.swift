@@ -57,6 +57,12 @@ struct AddProjectSheet: View {
         .presentationBackground(.clear)
         .presentationDragIndicator(.hidden)
         .ignoresSafeArea(.keyboard, edges: .bottom)
+        .onAppear {
+            // Autofocus the project name field when sheet appears
+            DispatchQueue.main.asyncAfter(deadline: .now()) {
+                isNameFieldFocused = true
+            }
+        }
     }
     
     // MARK: - Header Section
