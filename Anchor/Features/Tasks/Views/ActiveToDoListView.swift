@@ -82,10 +82,17 @@ struct ActiveToDoListView: View {
                     VStack(spacing: 0) {
                         HStack(spacing: 16) {
                             Button(action: {
-                                Haptic.shared.softImpact()
-                                activeToDoListViewModel.addTask(to: project, dismissFocus: {
-                                    isTaskFieldFocused = false
-                                })
+                                Haptic.shared.mediumImpact()
+                                
+                                if isTaskFieldFocused {
+                                    // Keyboard is visible - try to add task
+                                    activeToDoListViewModel.addTask(to: project, dismissFocus: {
+                                        isTaskFieldFocused = false
+                                    })
+                                } else {
+                                    // Keyboard is not visible - focus text field to bring up keyboard
+                                    isTaskFieldFocused = true
+                                }
                             }, label: {
                                 Image(systemName: activeToDoListViewModel.iconName(isTaskFieldFocused: isTaskFieldFocused))
                                     .font(.system(.headline,design: .rounded, weight: .bold))
@@ -98,8 +105,14 @@ struct ActiveToDoListView: View {
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                                 .focused($isTaskFieldFocused)
+                                .onChange(of: isTaskFieldFocused) { oldValue, newValue in
+                                    if !oldValue && newValue {
+                                        // Text field just became focused (keyboard appearing)
+                                        Haptic.shared.mediumImpact()
+                                    }
+                                }
                                 .onSubmit {
-                                    Haptic.shared.softImpact()
+                                    Haptic.shared.mediumImpact()
                                     activeToDoListViewModel.addTask(to: project, dismissFocus: {
                                         isTaskFieldFocused = false
                                     })

@@ -15,7 +15,7 @@ struct TaskListView: View {
     let selectedProject: ProjectModel?
     
     var body: some View {
-        ScrollView {
+        ScrollView(showsIndicators: false) {
             LazyVStack(spacing: 10) {
                 CompletedToDoListView(project: selectedProject)
                 ActiveToDoListView(project: selectedProject)

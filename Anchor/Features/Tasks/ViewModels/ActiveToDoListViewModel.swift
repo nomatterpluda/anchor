@@ -34,9 +34,6 @@ class ActiveToDoListViewModel: ObservableObject {
             
             context?.insert(newToDo)
             newTaskText = ""
-            
-            // Success haptic when task is created
-            Haptic.shared.mediumImpact()
         }
         dismissFocus()
     }

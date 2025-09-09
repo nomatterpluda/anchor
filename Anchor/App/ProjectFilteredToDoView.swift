@@ -59,7 +59,7 @@ struct ProjectFilteredToDoView: View {
                 }
             }
             .animation(.snappy(duration: 0.3), value: isMenuPresented)
-            .animation(.snappy, value: isAnyTextFieldFocused)
+            .animation(.easeOut(duration: 0.25), value: isAnyTextFieldFocused)
             .onChange(of: isAnyTextFieldFocused) { _, isFocused in
                 if isFocused && isMenuPresented {
                     // Dismiss menu when user starts typing
