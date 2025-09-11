@@ -52,7 +52,8 @@ struct ProjectFilteredToDoView: View {
                     if isMenuPresented {
                         ProjectMenuView(
                             isPresented: $isMenuPresented,
-                            project: projectSelectionViewModel.selectedProject
+                            project: projectSelectionViewModel.selectedProject,
+                            viewModel: projectSelectionViewModel
                         )
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -74,6 +75,11 @@ struct ProjectFilteredToDoView: View {
             )
             projectSelectionViewModel.context = context
             projectSelectionViewModel.initializeDefaultState(with: projects)
+        }
+        .sheet(isPresented: $projectSelectionViewModel.showEditProjectSheet) {
+            if let selectedProject = projectSelectionViewModel.selectedProject {
+                EditProjectSheet(viewModel: projectSelectionViewModel, project: selectedProject)
+            }
         }
     }
     

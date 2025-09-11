@@ -15,6 +15,7 @@ import SwiftData
 struct ProjectMenuView: View {
     @Binding var isPresented: Bool
     let project: ProjectModel?
+    @ObservedObject var viewModel: ProjectSelectionViewModel
     
     var body: some View {
         GlassEffectContainer {
@@ -22,8 +23,11 @@ struct ProjectMenuView: View {
                 // 3 Button HStack
                 HStack(spacing: 15) {
                     MenuButton(icon: "pencil", title: "Edit") {
-                        // TODO: Handle edit action
-                        print("Edit tapped")
+                        Haptic.shared.lightImpact()
+                        viewModel.showEditProjectSheet = true
+                        withAnimation(.snappy) {
+                            isPresented = false
+                        }
                     }
                     MenuButton(icon: "gearshape", title: "Settings") {
                         // TODO: Handle settings action
@@ -65,7 +69,8 @@ struct ProjectMenuView: View {
         
         ProjectMenuView(
             isPresented: $isPresented,
-            project: nil
+            project: nil,
+            viewModel: ProjectSelectionViewModel()
         )
     }
 }

@@ -23,6 +23,7 @@ class ProjectSelectionViewModel: ObservableObject {
     // Over-scroll properties
     @Published var overScrollProgress: CGFloat = 0
     @Published var showNewProjectSheet: Bool = false
+    @Published var showEditProjectSheet: Bool = false
     @Published var isThresholdReached: Bool = false
     
     var context: ModelContext?
