@@ -32,6 +32,17 @@ struct ProjectFilteredToDoView: View {
                 taskListView
                     .environment(\.accentColor, projectSelectionViewModel.selectedProject?.swiftUIColor ?? .allProjectColor)
                     .focused($isAnyTextFieldFocused)
+                    .simultaneousGesture(
+                        TapGesture()
+                            .onEnded { _ in
+                                if isMenuPresented {
+                                    Haptic.shared.lightImpact()
+                                    withAnimation(.snappy) {
+                                        isMenuPresented = false
+                                    }
+                                }
+                            }
+                    )
                                 
                 // Project selector bar at bottom - hide when typing
                 if !isAnyTextFieldFocused {
@@ -59,13 +70,13 @@ struct ProjectFilteredToDoView: View {
                     }
                 }
             }
-            .animation(.snappy(duration: 0.3), value: isMenuPresented)
-            .animation(.easeOut(duration: 0.25), value: isAnyTextFieldFocused)
-            .onChange(of: isAnyTextFieldFocused) { _, isFocused in
-                if isFocused && isMenuPresented {
-                    // Dismiss menu when user starts typing
-                    isMenuPresented = false
-                }
+        }
+        .animation(.snappy(duration: 0.3), value: isMenuPresented)
+        .animation(.easeOut(duration: 0.25), value: isAnyTextFieldFocused)
+        .onChange(of: isAnyTextFieldFocused) { _, isFocused in
+            if isFocused && isMenuPresented {
+                // Dismiss menu when user starts typing
+                isMenuPresented = false
             }
         }
         .onAppear {
