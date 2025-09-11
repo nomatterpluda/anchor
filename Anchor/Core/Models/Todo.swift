@@ -17,6 +17,7 @@ class Todo {
     private(set) var taskID: String = UUID().uuidString
     var taskName: String
     var isCompleted: Bool = false
+    var isFlagged: Bool = false
     var lastUpdate: Date = Date.now
     
     // Project relationship

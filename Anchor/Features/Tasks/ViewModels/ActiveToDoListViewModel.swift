@@ -7,6 +7,7 @@ class ActiveToDoListViewModel: ObservableObject {
     
     // View Properties
     @Published var newTaskText: String = ""
+    @Published var newTaskFlagged: Bool = false
     
     var context: ModelContext?
     
@@ -32,8 +33,12 @@ class ActiveToDoListViewModel: ObservableObject {
             // Use provided project (will be passed from calling view)
             newToDo.project = project
             
+            // Apply flag state from toolbar
+            newToDo.isFlagged = newTaskFlagged
+            
             context?.insert(newToDo)
             newTaskText = ""
+            newTaskFlagged = false // Reset flag state for next task
         }
         dismissFocus()
     }

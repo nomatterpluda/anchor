@@ -46,6 +46,14 @@ struct ActiveToDoListView: View {
     @Environment(\.accentColor) private var accentColor
     @FocusState private var isTaskFieldFocused: Bool
     
+    // Computed binding for toolbar visibility
+    private var toolbarVisible: Binding<Bool> {
+        Binding(
+            get: { isTaskFieldFocused },
+            set: { _ in } // FocusState handles its own setting
+        )
+    }
+    
 
    
 
@@ -105,6 +113,25 @@ struct ActiveToDoListView: View {
                                 .fontWeight(.semibold)
                                 .foregroundStyle(.white)
                                 .focused($isTaskFieldFocused)
+                                .toolbar {
+                                    TaskInputToolbar(
+                                        isVisible: toolbarVisible,
+                                        task: nil, // No existing task when adding new ones
+                                        newTaskFlagged: activeToDoListViewModel.newTaskFlagged,
+                                        currentProject: project, // Pass current project for colors
+                                        onDueDateSelected: { dueDateOption in
+                                            // TODO: Handle due date selection
+                                            print("Due date selected: \(dueDateOption)")
+                                        },
+                                        onFlagToggled: { isFlagged in
+                                            activeToDoListViewModel.newTaskFlagged = isFlagged
+                                        },
+                                        onProjectChanged: { project in
+                                            // TODO: Handle project change
+                                            print("Project changed: \(project?.projectName ?? "None")")
+                                        }
+                                    )
+                                }
                                 .onChange(of: isTaskFieldFocused) { oldValue, newValue in
                                     if !oldValue && newValue {
                                         // Text field just became focused (keyboard appearing)
@@ -117,6 +144,13 @@ struct ActiveToDoListView: View {
                                         isTaskFieldFocused = false
                                     })
                                 }
+                            
+                            // Flag icon for new task - shows when flagged
+                            if activeToDoListViewModel.newTaskFlagged {
+                                Image(systemName: "flag.fill")
+                                    .font(.system(.subheadline, weight: .medium))
+                                    .foregroundStyle(project?.swiftUIColor ?? .orange)
+                            }
                         }
                         .padding(.horizontal, 16)
                         .padding(.top, 8)

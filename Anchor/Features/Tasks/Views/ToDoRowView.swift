@@ -4,7 +4,8 @@
  * INDIVIDUAL TASK ROW COMPONENT
  * - Displays single task with checkbox and editable name
  * - Checkbox toggles task completion status with haptic feedback
- * - Task name is editable inline
+ * - Task name is editable inline with keyboard toolbar support
+ * - Shows flag icon when task is flagged (using project colors)
  * - Reusable component used by both Active and Completed task lists
  * - Handles task state changes through @Bindable todo model
  */
@@ -47,6 +48,35 @@ struct ToDoRowView: View {
                 .strikethrough(todo.isCompleted)
                 .foregroundStyle(todo.isCompleted ? .white.opacity(0.50): .primary)
                 .focused($isActive)
+                .toolbar {
+                    TaskInputToolbar(
+                        isVisible: Binding(
+                            get: { isActive },
+                            set: { _ in }
+                        ),
+                        task: todo,
+                        newTaskFlagged: nil, // Not relevant for existing tasks
+                        currentProject: nil, // Not relevant for existing tasks
+                        onDueDateSelected: { dueDateOption in
+                            // TODO: Handle due date selection for existing task
+                            print("Due date selected for task: \(dueDateOption)")
+                        },
+                        onFlagToggled: { isFlagged in
+                            // Flag state is already handled in the toolbar for existing tasks
+                        },
+                        onProjectChanged: { project in
+                            // TODO: Handle project change for existing task
+                            print("Project changed for task: \(project?.projectName ?? "None")")
+                        }
+                    )
+                }
+            
+            // Flag icon - appears on the right when task is flagged
+            if todo.isFlagged {
+                Image(systemName: "flag.fill")
+                    .font(.system(.subheadline, weight: .medium))
+                    .foregroundStyle(todo.project?.swiftUIColor ?? .orange)
+            }
         }
     }
 }
