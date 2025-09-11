@@ -20,18 +20,21 @@ struct ProjectMenuView: View {
     var body: some View {
         GlassEffectContainer {
             VStack(spacing: 20) {
-                // 3 Button HStack
+                // 3 Button HStack - Delete | Edit | Reorder
                 HStack(spacing: 15) {
+                    MenuButton(icon: "trash", title: "Delete") {
+                        Haptic.shared.lightImpact()
+                        if let project = project {
+                            viewModel.showDeleteConfirmation(for: project)
+                        }
+                        // Menu stays open - alert will handle the user flow
+                    }
                     MenuButton(icon: "pencil", title: "Edit") {
                         Haptic.shared.lightImpact()
                         viewModel.showEditProjectSheet = true
                         withAnimation(.snappy) {
                             isPresented = false
                         }
-                    }
-                    MenuButton(icon: "gearshape", title: "Settings") {
-                        // TODO: Handle settings action
-                        print("Settings tapped")
                     }
                     MenuButton(icon: "line.3.horizontal", title: "Reorder") {
                         // TODO: Handle reorder action
@@ -56,6 +59,14 @@ struct ProjectMenuView: View {
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 36)
+        }
+        .onAppear {
+            // Set up callback to close menu when deletion flow completes
+            viewModel.onDeleteFlowComplete = {
+                withAnimation(.snappy) {
+                    isPresented = false
+                }
+            }
         }
     }
 }

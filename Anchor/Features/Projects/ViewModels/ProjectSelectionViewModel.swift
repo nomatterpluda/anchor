@@ -26,6 +26,13 @@ class ProjectSelectionViewModel: ObservableObject {
     @Published var showEditProjectSheet: Bool = false
     @Published var isThresholdReached: Bool = false
     
+    // Deletion confirmation properties
+    @Published var showDeleteConfirmation: Bool = false
+    var projectToDelete: ProjectModel?
+    
+    // Menu closure callback for when deletion flow completes
+    var onDeleteFlowComplete: (() -> Void)?
+    
     var context: ModelContext?
     
     // Private state for haptic management
@@ -124,17 +131,67 @@ class ProjectSelectionViewModel: ObservableObject {
         selectedProject = newProject
     }
     
-    // Delete a project (and reassign its tasks to nil/All)
-    func deleteProject(_ project: ProjectModel) {
-        guard let context = context else { return }
+    // Show delete confirmation dialog for a project
+    func showDeleteConfirmation(for project: ProjectModel) {
+        projectToDelete = project
+        showDeleteConfirmation = true
+    }
+    
+    // Cancel delete confirmation (called automatically by SwiftUI or explicitly if needed)
+    func cancelDeleteConfirmation() {
+        projectToDelete = nil
+        showDeleteConfirmation = false
+        // Close menu when cancelling
+        onDeleteFlowComplete?()
+    }
+    
+    // Confirm and execute project deletion with navigation
+    func confirmDeleteProject() {
+        guard let projectToDelete = projectToDelete else { return }
         
-        // If deleting current project, switch to "All"
-        if selectedProject?.projectID == project.projectID {
-            selectedProject = nil
-        }
+        // Perform the actual deletion
+        deleteProject(projectToDelete)
+        
+        // Navigate back to project 0 (first project or "All")
+        navigateToProjectZero()
+        
+        // Clean up confirmation state
+        self.projectToDelete = nil
+        showDeleteConfirmation = false
+        
+        // Close menu when deletion completes
+        onDeleteFlowComplete?()
+    }
+    
+    // Delete a project (and reassign its tasks to nil/All)
+    private func deleteProject(_ project: ProjectModel) {
+        guard let context = context else { return }
         
         // Tasks will be cascade deleted based on model relationship
         context.delete(project)
+        
+        // Save context to persist deletion
+        do {
+            try context.save()
+        } catch {
+            print("Error saving context after project deletion: \(error)")
+        }
+    }
+    
+    // Navigate back to project 0 (first in list or "All" if no projects)
+    private func navigateToProjectZero() {
+        let allProjects = getAllProjects()
+        
+        if let firstProject = allProjects.first {
+            // Select first project (index 0)
+            selectedProject = firstProject
+        } else {
+            // No projects left, select "All"
+            selectedProject = nil
+        }
+        
+        // Reset scroll position to 0
+        scrollPosition = 0
     }
     
     // MARK: - Over-Scroll Logic

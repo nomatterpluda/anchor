@@ -81,6 +81,21 @@ struct ProjectFilteredToDoView: View {
                 EditProjectSheet(viewModel: projectSelectionViewModel, project: selectedProject)
             }
         }
+        .alert(
+            "Delete project \"\(projectSelectionViewModel.projectToDelete?.projectName ?? "")\"?",
+            isPresented: $projectSelectionViewModel.showDeleteConfirmation
+        ) {
+            Button("Delete", role: .destructive) {
+                withAnimation(.easeInOut(duration: 0.3)) {
+                    projectSelectionViewModel.confirmDeleteProject()
+                }
+            }
+            Button("Cancel", role: .cancel) {
+                projectSelectionViewModel.cancelDeleteConfirmation()
+            }
+        } message: {
+            Text("This will delete all the Tasks in this Project.")
+        }
     }
     
     // MARK: - Task List
