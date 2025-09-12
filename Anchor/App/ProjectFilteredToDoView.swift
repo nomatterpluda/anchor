@@ -92,6 +92,9 @@ struct ProjectFilteredToDoView: View {
                 EditProjectSheet(viewModel: projectSelectionViewModel, project: selectedProject)
             }
         }
+        .sheet(isPresented: $projectSelectionViewModel.showSettingsSheet) {
+            SettingsView()
+        }
         .alert(
             "Delete project \"\(projectSelectionViewModel.projectToDelete?.projectName ?? "")\"?",
             isPresented: $projectSelectionViewModel.showDeleteConfirmation

@@ -11,6 +11,7 @@
  */
 
 import SwiftUI
+import SwiftData
 
 struct ToDoRowView: View {
     
@@ -43,12 +44,25 @@ struct ToDoRowView: View {
                     .foregroundStyle(todo.isCompleted ? accentColor: .primary.opacity(0.50))
                     .animation(.none, value: accentColor)
                 })
-            TextField("New To Do", text: $todo.taskName)
+            TextField("", text: $todo.taskName)
                 .font(.system(.title2,design: .rounded))
                 .fontWeight(.semibold)
                 .strikethrough(todo.isCompleted)
                 .foregroundStyle(todo.isCompleted ? .white.opacity(0.50): .primary)
                 .focused($isActive)
+                .onChange(of: isActive) { _, isFocused in
+                    if !isFocused {
+                        // When focus is lost, check if task name is empty and delete if so
+                        let trimmedName = todo.taskName.trimmingCharacters(in: .whitespacesAndNewlines)
+                        if trimmedName.isEmpty {
+                            context.delete(todo)
+                        } else {
+                            // Update task name with trimmed version and update timestamp
+                            todo.taskName = trimmedName
+                            todo.lastUpdate = .now
+                        }
+                    }
+                }
                 .toolbar {
                     TaskInputToolbar(
                         isVisible: Binding(
@@ -58,6 +72,7 @@ struct ToDoRowView: View {
                         morphNamespace: morphNamespace,
                         task: todo,
                         newTaskFlagged: nil, // Not relevant for existing tasks
+                        newTaskDueDate: nil, // Not relevant for existing tasks
                         currentProject: nil, // Not relevant for existing tasks
                         onDueDateSelected: { dueDateOption in
                             handleDueDateSelection(dueDateOption)
@@ -88,6 +103,10 @@ struct ToDoRowView: View {
                             .foregroundStyle(dateTextColor(for: dueDate).opacity(0.8))
                     }
                 }
+                .onTapGesture {
+                    Haptic.shared.mediumImpact()
+                    isActive = true
+                }
             }
             
             // Flag icon - appears on the right when task is flagged
@@ -95,6 +114,10 @@ struct ToDoRowView: View {
                 Image(systemName: "flag.fill")
                     .font(.system(.subheadline, weight: .medium))
                     .foregroundStyle(todo.project?.swiftUIColor ?? .orange)
+                    .onTapGesture {
+                        Haptic.shared.mediumImpact()
+                        isActive = true
+                    }
             }
         }
     }

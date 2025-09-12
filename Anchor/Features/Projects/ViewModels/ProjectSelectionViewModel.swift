@@ -24,6 +24,7 @@ class ProjectSelectionViewModel: ObservableObject {
     @Published var overScrollProgress: CGFloat = 0
     @Published var showNewProjectSheet: Bool = false
     @Published var showEditProjectSheet: Bool = false
+    @Published var showSettingsSheet: Bool = false
     @Published var isThresholdReached: Bool = false
     
     // Deletion confirmation properties
@@ -127,8 +128,9 @@ class ProjectSelectionViewModel: ObservableObject {
         
         context.insert(newProject)
         
-        // Auto-select the new project
+        // Auto-select the new project and scroll to it
         selectedProject = newProject
+        scrollPosition = 0 // New project is always at position 0
     }
     
     // Show delete confirmation dialog for a project

@@ -55,42 +55,44 @@ struct ProjectSelectorBar: View {
                     }
                 
                 // Scrollable project list (right side) - fade non-selected when menu open
-                ScrollViewReader { proxy in
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        LazyHStack(spacing: 20) {
-                            ForEach(Array(allProjectOptions.enumerated()), id: \.offset) { index, option in
-                                ProjectListItem(
-                                    name: option.name,
-                                    activeTaskCount: getActiveTaskCount(for: option),
-                                    isSelected: index == (viewModel.scrollPosition ?? 0)
-                                ) {
-                                    // If this is the selected project, toggle menu instead of selecting
-                                    if index == (viewModel.scrollPosition ?? 0) {
-                                        Haptic.shared.lightImpact()
-                                        withAnimation(.snappy) {
-                                            isMenuPresented.toggle()
-                                        }
-                                    } else {
-                                        // Handle selection through ViewModel
-                                        viewModel.selectProject(option, at: index) { scrollIndex in
-                                            withAnimation(.easeOut(duration: 0.3)) {
-                                                proxy.scrollTo(scrollIndex, anchor: .leading)
+                GeometryReader { geometry in
+                    ScrollViewReader { proxy in
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            LazyHStack(spacing: 20) {
+                                ForEach(Array(allProjectOptions.enumerated()), id: \.offset) { index, option in
+                                    ProjectListItem(
+                                        name: option.name,
+                                        activeTaskCount: getActiveTaskCount(for: option),
+                                        isSelected: index == (viewModel.scrollPosition ?? 0)
+                                    ) {
+                                        // If this is the selected project, toggle menu instead of selecting
+                                        if index == (viewModel.scrollPosition ?? 0) {
+                                            Haptic.shared.lightImpact()
+                                            withAnimation(.snappy) {
+                                                isMenuPresented.toggle()
+                                            }
+                                        } else {
+                                            // Handle selection through ViewModel
+                                            viewModel.selectProject(option, at: index) { scrollIndex in
+                                                withAnimation(.easeOut(duration: 0.3)) {
+                                                    proxy.scrollTo(scrollIndex, anchor: .leading)
+                                                }
                                             }
                                         }
                                     }
+                                    .opacity(isMenuPresented && index != (viewModel.scrollPosition ?? 0) ? 0.0 : 1.0)
+                                    .allowsHitTesting(!(isMenuPresented && index != (viewModel.scrollPosition ?? 0)))
+                                    .id(index)
                                 }
-                                .opacity(isMenuPresented && index != (viewModel.scrollPosition ?? 0) ? 0.0 : 1.0)
-                                .allowsHitTesting(!(isMenuPresented && index != (viewModel.scrollPosition ?? 0)))
-                                .id(index)
                             }
+                            .padding(.leading, 16)
+                            .padding(.trailing, max(80, geometry.size.width - 80))
                         }
-                        .padding(.leading, 16)
-                        .padding(.trailing, 160)
-                    }
-                    .scrollPosition(id: $viewModel.scrollPosition)
-                    .scrollTargetLayout()
-                    .scrollTargetBehavior(.viewAligned)
-                    .simultaneousGesture(
+                        .scrollPosition(id: $viewModel.scrollPosition)
+                        .scrollTargetLayout()
+                        .scrollTargetBehavior(.viewAligned)
+                        .scrollBounceBehavior(.basedOnSize, axes: [.horizontal])
+                        .simultaneousGesture(
                         DragGesture()
                             .onChanged { value in
                                 // Only detect over-scroll when we're at the first item (position 0)
@@ -115,6 +117,7 @@ struct ProjectSelectorBar: View {
                         )
                     }
                 }
+            }
             }
         }
         .padding(.leading, 16)

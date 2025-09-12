@@ -31,6 +31,9 @@ struct TaskInputToolbar: ToolbarContent {
     // For new tasks, we need to track flag state externally
     let newTaskFlagged: Bool?
     
+    // For new tasks, we need to track due date externally
+    let newTaskDueDate: Date?
+    
     // Current project context for new tasks (for colors)
     let currentProject: ProjectModel?
     
@@ -45,6 +48,9 @@ struct TaskInputToolbar: ToolbarContent {
         if let task = task, task.dueDate != nil {
             // Existing task with date assigned - use project color
             return task.project?.swiftUIColor ?? .blue
+        } else if task == nil && newTaskDueDate != nil {
+            // New task with date assigned - use current project color
+            return currentProject?.swiftUIColor ?? .blue
         } else {
             // No date assigned - use default primary color
             return .primary

@@ -20,25 +20,48 @@ struct ProjectMenuView: View {
     var body: some View {
         GlassEffectContainer {
             VStack(spacing: 20) {
-                // 3 Button HStack - Delete | Edit | Reorder
+                // 3 Button HStack - Different buttons for "All" project vs regular projects
                 HStack(spacing: 15) {
-                    MenuButton(icon: "trash", title: "Delete") {
-                        Haptic.shared.lightImpact()
-                        if let project = project {
-                            viewModel.showDeleteConfirmation(for: project)
+                    if project == nil {
+                        // All Project Menu: Settings | Add Project | Reorder
+                        MenuButton(icon: "gearshape", title: "Settings") {
+                            Haptic.shared.lightImpact()
+                            viewModel.showSettingsSheet = true
+                            withAnimation(.snappy) {
+                                isPresented = false
+                            }
                         }
-                        // Menu stays open - alert will handle the user flow
-                    }
-                    MenuButton(icon: "pencil", title: "Edit") {
-                        Haptic.shared.lightImpact()
-                        viewModel.showEditProjectSheet = true
-                        withAnimation(.snappy) {
-                            isPresented = false
+                        MenuButton(icon: "plus", title: "Project") {
+                            Haptic.shared.lightImpact()
+                            viewModel.showNewProjectSheet = true
+                            withAnimation(.snappy) {
+                                isPresented = false
+                            }
                         }
-                    }
-                    MenuButton(icon: "line.3.horizontal", title: "Reorder") {
-                        // TODO: Handle reorder action
-                        print("Reorder tapped")
+                        MenuButton(icon: "line.3.horizontal", title: "Reorder") {
+                            // TODO: Handle reorder action
+                            print("Reorder tapped")
+                        }
+                    } else {
+                        // Regular Project Menu: Delete | Edit | Reorder
+                        MenuButton(icon: "trash", title: "Delete") {
+                            Haptic.shared.lightImpact()
+                            if let project = project {
+                                viewModel.showDeleteConfirmation(for: project)
+                            }
+                            // Menu stays open - alert will handle the user flow
+                        }
+                        MenuButton(icon: "pencil", title: "Edit") {
+                            Haptic.shared.lightImpact()
+                            viewModel.showEditProjectSheet = true
+                            withAnimation(.snappy) {
+                                isPresented = false
+                            }
+                        }
+                        MenuButton(icon: "line.3.horizontal", title: "Reorder") {
+                            // TODO: Handle reorder action
+                            print("Reorder tapped")
+                        }
                     }
                 }
                 

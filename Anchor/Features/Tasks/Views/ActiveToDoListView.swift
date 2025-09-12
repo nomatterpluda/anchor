@@ -120,6 +120,7 @@ struct ActiveToDoListView: View {
                                         morphNamespace: morphNamespace,
                                         task: nil, // No existing task when adding new ones
                                         newTaskFlagged: activeToDoListViewModel.newTaskFlagged,
+                                        newTaskDueDate: activeToDoListViewModel.newTaskDueDate,
                                         currentProject: project, // Pass current project for colors
                                         onDueDateSelected: { dueDateOption in
                                             activeToDoListViewModel.handleDueDateSelection(dueDateOption)
@@ -140,6 +141,14 @@ struct ActiveToDoListView: View {
                                     if !oldValue && newValue {
                                         // Text field just became focused (keyboard appearing)
                                         Haptic.shared.mediumImpact()
+                                    } else if oldValue && !newValue {
+                                        // Text field lost focus (keyboard dismissed)
+                                        // Reset flag and date if no task was created
+                                        let trimmedText = activeToDoListViewModel.newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
+                                        if trimmedText.isEmpty {
+                                            activeToDoListViewModel.newTaskFlagged = false
+                                            activeToDoListViewModel.newTaskDueDate = nil
+                                        }
                                     }
                                 }
                                 .onSubmit {
