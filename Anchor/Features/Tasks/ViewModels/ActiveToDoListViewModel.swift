@@ -8,6 +8,7 @@ class ActiveToDoListViewModel: ObservableObject {
     // View Properties
     @Published var newTaskText: String = ""
     @Published var newTaskFlagged: Bool = false
+    @Published var newTaskDueDate: Date? = nil
     
     var context: ModelContext?
     
@@ -28,7 +29,10 @@ class ActiveToDoListViewModel: ObservableObject {
     // Add task
     func addTask(to project: ProjectModel? = nil, dismissFocus: @escaping () -> Void) {
         if !newTaskText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            let newToDo = Todo(taskName: newTaskText.trimmingCharacters(in: .whitespacesAndNewlines))
+            let newToDo = Todo(
+                taskName: newTaskText.trimmingCharacters(in: .whitespacesAndNewlines),
+                dueDate: newTaskDueDate
+            )
             
             // Use provided project (will be passed from calling view)
             newToDo.project = project
@@ -39,8 +43,22 @@ class ActiveToDoListViewModel: ObservableObject {
             context?.insert(newToDo)
             newTaskText = ""
             newTaskFlagged = false // Reset flag state for next task
+            newTaskDueDate = nil // Reset date for next task
         }
         dismissFocus()
+    }
+    
+    // MARK: - Date Handling
+    func handleDueDateSelection(_ option: DueDateOption) {
+        if option == .none {
+            newTaskDueDate = nil
+        } else if let date = option.toDate() {
+            newTaskDueDate = date
+        }
+    }
+    
+    func setCustomDate(_ date: Date) {
+        newTaskDueDate = date
     }
     
     

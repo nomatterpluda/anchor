@@ -45,6 +45,7 @@ struct ActiveToDoListView: View {
     @Environment(\.modelContext) private var context
     @Environment(\.accentColor) private var accentColor
     @FocusState private var isTaskFieldFocused: Bool
+    @Namespace private var morphNamespace
     
     // Computed binding for toolbar visibility
     private var toolbarVisible: Binding<Bool> {
@@ -116,12 +117,15 @@ struct ActiveToDoListView: View {
                                 .toolbar {
                                     TaskInputToolbar(
                                         isVisible: toolbarVisible,
+                                        morphNamespace: morphNamespace,
                                         task: nil, // No existing task when adding new ones
                                         newTaskFlagged: activeToDoListViewModel.newTaskFlagged,
                                         currentProject: project, // Pass current project for colors
                                         onDueDateSelected: { dueDateOption in
-                                            // TODO: Handle due date selection
-                                            print("Due date selected: \(dueDateOption)")
+                                            activeToDoListViewModel.handleDueDateSelection(dueDateOption)
+                                        },
+                                        onCustomDateSelected: { date in
+                                            activeToDoListViewModel.setCustomDate(date)
                                         },
                                         onFlagToggled: { isFlagged in
                                             activeToDoListViewModel.newTaskFlagged = isFlagged
@@ -144,6 +148,21 @@ struct ActiveToDoListView: View {
                                         isTaskFieldFocused = false
                                     })
                                 }
+                            
+                            // Date display for new task - shows when set
+                            if let dueDate = activeToDoListViewModel.newTaskDueDate {
+                                VStack(alignment: .trailing, spacing: 2) {
+                                    Text(dueDate.taskDisplayString)
+                                        .font(.system(.caption, design: .rounded, weight: .medium))
+                                        .foregroundStyle(.secondary)
+                                    
+                                    if let timeString = dueDate.timeString {
+                                        Text(timeString)
+                                            .font(.system(.caption2, design: .rounded, weight: .regular))
+                                            .foregroundStyle(.secondary.opacity(0.8))
+                                    }
+                                }
+                            }
                             
                             // Flag icon for new task - shows when flagged
                             if activeToDoListViewModel.newTaskFlagged {

@@ -22,6 +22,7 @@ struct ToDoRowView: View {
     @FocusState private var isActive: Bool
     @Environment(\.modelContext) private var context
     @Environment(\.accentColor) private var accentColor
+    @Namespace private var morphNamespace
    
     var body: some View {
         HStack (spacing: 12){
@@ -54,12 +55,15 @@ struct ToDoRowView: View {
                             get: { isActive },
                             set: { _ in }
                         ),
+                        morphNamespace: morphNamespace,
                         task: todo,
                         newTaskFlagged: nil, // Not relevant for existing tasks
                         currentProject: nil, // Not relevant for existing tasks
                         onDueDateSelected: { dueDateOption in
-                            // TODO: Handle due date selection for existing task
-                            print("Due date selected for task: \(dueDateOption)")
+                            handleDueDateSelection(dueDateOption)
+                        },
+                        onCustomDateSelected: { date in
+                            // For existing tasks, date is handled directly in toolbar
                         },
                         onFlagToggled: { isFlagged in
                             // Flag state is already handled in the toolbar for existing tasks
@@ -71,12 +75,52 @@ struct ToDoRowView: View {
                     )
                 }
             
+            // Date display - appears before flag when set
+            if let dueDate = todo.dueDate {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(dueDate.taskDisplayString)
+                        .font(.system(.caption, design: .rounded, weight: .medium))
+                        .foregroundStyle(dateTextColor(for: dueDate))
+                    
+                    if let timeString = dueDate.timeString {
+                        Text(timeString)
+                            .font(.system(.caption2, design: .rounded, weight: .regular))
+                            .foregroundStyle(dateTextColor(for: dueDate).opacity(0.8))
+                    }
+                }
+            }
+            
             // Flag icon - appears on the right when task is flagged
             if todo.isFlagged {
                 Image(systemName: "flag.fill")
                     .font(.system(.subheadline, weight: .medium))
                     .foregroundStyle(todo.project?.swiftUIColor ?? .orange)
             }
+        }
+    }
+    
+    // MARK: - Date Handling
+    private func handleDueDateSelection(_ option: DueDateOption) {
+        if option == .none {
+            todo.dueDate = nil
+        } else if let date = option.toDate() {
+            todo.dueDate = date
+        }
+        todo.lastUpdate = .now
+    }
+    
+    // MARK: - Date Color Logic
+    private func dateTextColor(for date: Date) -> Color {
+        let calendar = Calendar.current
+        let now = Date()
+        
+        // Check if date is in the past (before today)
+        if calendar.compare(date, to: now, toGranularity: .day) == .orderedAscending {
+            // Date is overdue - use project color or fallback to orange
+            return todo.project?.swiftUIColor ?? .orange
+        } else {
+            // Date is today or future - use secondary color
+            return .secondary
         }
     }
 }

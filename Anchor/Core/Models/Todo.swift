@@ -18,13 +18,15 @@ class Todo {
     var taskName: String
     var isCompleted: Bool = false
     var isFlagged: Bool = false
+    var dueDate: Date? = nil
     var lastUpdate: Date = Date.now
     
     // Project relationship
     var project: ProjectModel?
     
-    init(taskName: String) {
+    init(taskName: String, dueDate: Date? = nil) {
         self.taskName = taskName
+        self.dueDate = dueDate
     }
 }
 
