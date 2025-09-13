@@ -35,7 +35,7 @@ struct ProjectReorderSheetContent: View {
     
     // Dynamic height calculations
     private var listHeight: CGFloat {
-        CGFloat(reorderedProjects.count) * 70
+        CGFloat(reorderedProjects.count + 1) * 70 // +1 for Add Project row
     }
     
     private var maxListHeight: CGFloat {
@@ -61,9 +61,16 @@ struct ProjectReorderSheetContent: View {
                 ForEach(Array(reorderedProjects.enumerated()), id: \.element.projectID) { index, project in
                     ProjectReorderRow(project: project)
                         .listRowBackground(Color.clear)
-                        .listRowSeparator(index == reorderedProjects.count - 1 ? .hidden : .visible)
+                        .listRowSeparator(.visible)
                 }
                 .onMove(perform: moveProjects)
+                
+                // Add Project row
+                AddProjectRow {
+                    handleAddProject()
+                }
+                .listRowBackground(Color.clear)
+                .listRowSeparator(.hidden)
             }
             .listStyle(.plain)
             .background(Color.clear)
@@ -132,6 +139,16 @@ struct ProjectReorderSheetContent: View {
         
         viewModel.saveReorderChanges()
     }
+    
+    private func handleAddProject() {
+        Haptic.shared.lightImpact()
+        viewModel.showReorderSheet = false
+        
+        // Open add project sheet after a small delay
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            viewModel.showNewProjectSheet = true
+        }
+    }
 }
 
 // MARK: - Project Reorder Row
@@ -163,6 +180,33 @@ struct ProjectReorderRow: View {
                 .foregroundColor(.secondary)
                 .font(.system(size: 16))
         }
+    }
+}
+
+// MARK: - Add Project Row
+
+struct AddProjectRow: View {
+    let action: () -> Void
+    
+    var body: some View {
+        Button(action: action) {
+            HStack(spacing: 16) {
+                // Plus icon (same size as StaticProjectIcon)
+                Image(systemName: "plus.circle.fill")
+                    .font(.system(size: 32))
+                    .foregroundColor(.gray)
+                    .frame(width: 34, height: 34) // Match StaticProjectIcon 34x34 frame
+                
+                // Add Project text
+                Text("Add Project")
+                    .font(.system(.title2, design: .rounded))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                
+                Spacer()
+            }
+        }
+        .buttonStyle(PlainButtonStyle())
     }
 }
 
