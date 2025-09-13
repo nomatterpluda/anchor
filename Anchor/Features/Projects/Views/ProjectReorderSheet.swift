@@ -14,31 +14,62 @@ import SwiftData
 
 struct ProjectReorderSheet: View {
     @ObservedObject var viewModel: ProjectSelectionViewModel
+    
+    var body: some View {
+        DynamicSheet(animation: .snappy(duration: 0.3)) {
+            ProjectReorderSheetContent(viewModel: viewModel)
+        }
+        .presentationBackground(.clear)
+        .presentationDragIndicator(.hidden)
+    }
+}
+
+// MARK: - Project Reorder Sheet Content
+
+struct ProjectReorderSheetContent: View {
+    @ObservedObject var viewModel: ProjectSelectionViewModel
     @Query(sort: [SortDescriptor(\ProjectModel.orderIndex)]) private var projects: [ProjectModel]
     
     // Local state for reordering (changes only applied on Save)
     @State private var reorderedProjects: [ProjectModel] = []
     
+    // Dynamic height calculations
+    private var listHeight: CGFloat {
+        CGFloat(reorderedProjects.count) * 70
+    }
+    
+    private var maxListHeight: CGFloat {
+        // Calculate max height: screen height minus header, buttons, padding, and safe area
+        let screenHeight = UIScreen.main.bounds.height
+        let reservedSpace: CGFloat = 300 // Header + buttons + padding + safe area
+        return screenHeight - reservedSpace
+    }
+    
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
             // Header
             HStack {
                 Text("Reorder Projects")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
+                    .font(.system(size: 34, weight: .bold, design: .rounded))
                     .foregroundStyle(.white)
                 Spacer()
             }
-            .padding(.top, 8)
             .padding(.horizontal, 16)
+            .padding(.top, 24)
             
             List {
-                ForEach(reorderedProjects, id: \.projectID) { project in
+                ForEach(Array(reorderedProjects.enumerated()), id: \.element.projectID) { index, project in
                     ProjectReorderRow(project: project)
+                        .listRowBackground(Color.clear)
+                        .listRowSeparator(index == reorderedProjects.count - 1 ? .hidden : .visible)
                 }
                 .onMove(perform: moveProjects)
             }
-            .listStyle(.insetGrouped)
-            .background(.clear)
+            .listStyle(.plain)
+            .background(Color.clear)
+            .scrollContentBackground(.hidden)
+            .scrollDisabled(listHeight <= maxListHeight) // Disable scrolling only when content fits
+            .frame(height: min(listHeight, maxListHeight)) // Cap at maximum height
             
             // Bottom buttons
             HStack(spacing: 15) {
@@ -65,12 +96,11 @@ struct ProjectReorderSheet: View {
                 }
                 .glassEffect(in: RoundedRectangle(cornerRadius: 20))
             }
-            .padding(.horizontal, 30)
+            .padding(.horizontal, 10)
+            .padding(.bottom, 8)
         }
         .background(.clear)
-        .presentationDetents([.medium, .large])
-        .presentationBackground(.clear)
-        .presentationDragIndicator(.hidden)
+        .padding(20)
         .onAppear {
             // Initialize local state with current projects
             reorderedProjects = projects
@@ -110,14 +140,21 @@ struct ProjectReorderRow: View {
     let project: ProjectModel
     
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 16) {
             // Project icon
             StaticProjectIcon(project: project, isThresholdReached: false, isMenuPresented: false)
-                .scaleEffect(0.8)
             
-            // Project name
-            Text(project.projectName)
-                .font(.body)
+            // Project name and task count
+            HStack(alignment: .firstTextBaseline, spacing: 5) {
+                Text(project.projectName)
+                    .font(.system(.title2, design: .rounded))
+                    .fontWeight(.semibold)
+                    .foregroundStyle(.white)
+                
+                Text("\(project.activeTodos.count)")
+                    .font(.system(size: 16, weight: .medium, design: .rounded))
+                    .foregroundStyle(.white.opacity(0.4))
+            }
             
             Spacer()
             
@@ -134,13 +171,15 @@ struct ProjectReorderRow: View {
     
     let container = try! ModelContainer(for: ProjectModel.self, Todo.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
     
-    // Create dummy projects
+    // Create dummy projects with varying counts to test dynamic height
     let dummyProjects = [
         ProjectModel(name: "Work", icon: "briefcase.fill", color: "blue", orderIndex: 0),
         ProjectModel(name: "Personal", icon: "person.fill", color: "green", orderIndex: 1),
         ProjectModel(name: "Learning", icon: "book.fill", color: "orange", orderIndex: 2),
         ProjectModel(name: "Health & Fitness", icon: "heart.fill", color: "red", orderIndex: 3),
-        ProjectModel(name: "Travel Plans", icon: "airplane", color: "purple", orderIndex: 4)
+        ProjectModel(name: "Travel Plans", icon: "airplane", color: "purple", orderIndex: 4),
+        ProjectModel(name: "Side Projects", icon: "hammer.fill", color: "cyan", orderIndex: 5),
+        ProjectModel(name: "Reading", icon: "books.vertical.fill", color: "mint", orderIndex: 6)
     ]
     
     // Insert dummy projects into container

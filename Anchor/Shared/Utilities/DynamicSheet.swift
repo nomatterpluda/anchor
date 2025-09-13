@@ -24,8 +24,9 @@ struct DynamicSheet<Content: View>: View {
                         /// Customize it according to your needs!
                         sheetHeight = min(newValue.height, windowSize.height - 110)
                     } else {
-                        // Remove animation to prevent bounce with keyboard
-                        sheetHeight = min(newValue.height, windowSize.height - 110)
+                        withAnimation(animation) {
+                            sheetHeight = min(newValue.height, windowSize.height - 110)
+                        }
                     }
                 }
         }
