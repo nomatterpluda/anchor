@@ -39,8 +39,11 @@ struct ProjectMenuView: View {
                             }
                         }
                         MenuButton(icon: "line.3.horizontal", title: "Reorder") {
-                            // TODO: Handle reorder action
-                            print("Reorder tapped")
+                            Haptic.shared.lightImpact()
+                            viewModel.showReorderSheet = true
+                            withAnimation(.snappy) {
+                                isPresented = false
+                            }
                         }
                     } else {
                         // Regular Project Menu: Delete | Edit | Reorder
@@ -59,8 +62,11 @@ struct ProjectMenuView: View {
                             }
                         }
                         MenuButton(icon: "line.3.horizontal", title: "Reorder") {
-                            // TODO: Handle reorder action
-                            print("Reorder tapped")
+                            Haptic.shared.lightImpact()
+                            viewModel.showReorderSheet = true
+                            withAnimation(.snappy) {
+                                isPresented = false
+                            }
                         }
                     }
                 }

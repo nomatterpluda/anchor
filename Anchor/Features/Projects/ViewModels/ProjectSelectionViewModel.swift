@@ -11,6 +11,7 @@
 
 import Foundation
 import SwiftData
+import SwiftUI
 internal import Combine
 
 class ProjectSelectionViewModel: ObservableObject {
@@ -25,6 +26,7 @@ class ProjectSelectionViewModel: ObservableObject {
     @Published var showNewProjectSheet: Bool = false
     @Published var showEditProjectSheet: Bool = false
     @Published var showSettingsSheet: Bool = false
+    @Published var showReorderSheet: Bool = false
     @Published var isThresholdReached: Bool = false
     
     // Deletion confirmation properties
@@ -304,6 +306,41 @@ class ProjectSelectionViewModel: ObservableObject {
         } catch {
             print("Error fetching projects: \(error)")
             return []
+        }
+    }
+    
+    // MARK: - Project Reordering
+    
+    // Reorder projects using SwiftUI's onMove logic
+    func reorderProjects(_ projects: [ProjectModel], from source: IndexSet, to destination: Int) {
+        guard let context = context else { return }
+        
+        // Create mutable copy for reordering
+        var reorderedProjects = projects
+        reorderedProjects.move(fromOffsets: source, toOffset: destination)
+        
+        // Update orderIndex for all projects based on new positions
+        for (index, project) in reorderedProjects.enumerated() {
+            project.orderIndex = index
+        }
+        
+        // Save context to persist changes
+        do {
+            try context.save()
+        } catch {
+            print("Error saving reordered projects: \(error)")
+        }
+    }
+    
+    // Save reorder changes (called from sheet Save button)
+    func saveReorderChanges() {
+        guard let context = context else { return }
+        
+        do {
+            try context.save()
+            showReorderSheet = false
+        } catch {
+            print("Error saving reorder changes: \(error)")
         }
     }
 }
