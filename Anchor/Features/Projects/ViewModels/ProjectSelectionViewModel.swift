@@ -18,6 +18,8 @@ class ProjectSelectionViewModel: ObservableObject {
     // Published Properties
     @Published var selectedProject: ProjectModel?
     @Published var scrollPosition: Int? = 0
+    @Published var leftmostIndex: Int = 0
+    var isManualScrolling: Bool = false
     @Published var showProjectMenu: Bool = false
     @Published var isCreatingProject: Bool = false
     
@@ -54,17 +56,18 @@ class ProjectSelectionViewModel: ObservableObject {
     
     // Handle project selection with haptic feedback
     func selectProject(_ option: ProjectOption, at index: Int, scrollAction: @escaping (Int) -> Void) {
-        // Haptic feedback
         Haptic.shared.softImpact()
-        
-        // Update scroll position
-        scrollPosition = index
-        
-        // Perform scroll animation
-        scrollAction(index)
-        
-        // Update selected project
         selectedProject = option.projectModel
+        leftmostIndex = index  // Track which item will be leftmost
+        
+        // Set flag to prevent double animation from visibility change
+        isManualScrolling = true
+        scrollAction(index)    // Trigger visual scroll
+        
+        // Reset flag after animation completes
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
+            self.isManualScrolling = false
+        }
     }
     
     // Handle scroll position changes

@@ -112,7 +112,7 @@ struct ProjectReorderRow: View {
     var body: some View {
         HStack(spacing: 12) {
             // Project icon
-            StaticProjectIcon(project: project, isThresholdReached: false)
+            StaticProjectIcon(project: project, isThresholdReached: false, isMenuPresented: false)
                 .scaleEffect(0.8)
             
             // Project name

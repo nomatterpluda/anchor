@@ -71,7 +71,8 @@ struct ProjectMenuView: View {
                     }
                 }
                 
-                // Close Button
+                // Close Button - HIDDEN
+                /*
                 Button {
                     Haptic.shared.lightImpact()
                     withAnimation(.snappy) {
@@ -85,6 +86,7 @@ struct ProjectMenuView: View {
                         .foregroundStyle(.white)
                 }
                 .glassEffect(in: RoundedRectangle(cornerRadius: 20))
+                */
             }
             .padding(.horizontal, 16)
             .padding(.bottom, 36)

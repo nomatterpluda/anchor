@@ -45,7 +45,8 @@ struct ProjectSelectorBar: View {
                 // Static project icon (left side) - tappable
                 StaticProjectIcon(
                     project: viewModel.selectedProject,
-                    isThresholdReached: viewModel.isThresholdReached
+                    isThresholdReached: viewModel.isThresholdReached,
+                    isMenuPresented: isMenuPresented
                 )
                     .onTapGesture {
                         Haptic.shared.lightImpact()
@@ -63,10 +64,10 @@ struct ProjectSelectorBar: View {
                                     ProjectListItem(
                                         name: option.name,
                                         activeTaskCount: getActiveTaskCount(for: option),
-                                        isSelected: index == (viewModel.scrollPosition ?? 0)
+                                        isSelected: index == viewModel.leftmostIndex
                                     ) {
                                         // If this is the selected project, toggle menu instead of selecting
-                                        if index == (viewModel.scrollPosition ?? 0) {
+                                        if index == viewModel.leftmostIndex {
                                             Haptic.shared.lightImpact()
                                             withAnimation(.snappy) {
                                                 isMenuPresented.toggle()
@@ -80,42 +81,68 @@ struct ProjectSelectorBar: View {
                                             }
                                         }
                                     }
-                                    .opacity(isMenuPresented && index != (viewModel.scrollPosition ?? 0) ? 0.0 : 1.0)
-                                    .allowsHitTesting(!(isMenuPresented && index != (viewModel.scrollPosition ?? 0)))
+                                    .opacity(isMenuPresented && index != viewModel.leftmostIndex ? 0.0 : 1.0)
+                                    .allowsHitTesting(!(isMenuPresented && index != viewModel.leftmostIndex))
                                     .id(index)
                                 }
                             }
                             .padding(.leading, 16)
                             .padding(.trailing, max(80, geometry.size.width - 80))
                         }
-                        .scrollPosition(id: $viewModel.scrollPosition)
                         .scrollTargetLayout()
                         .scrollTargetBehavior(.viewAligned)
                         .scrollBounceBehavior(.basedOnSize, axes: [.horizontal])
                         .simultaneousGesture(
-                        DragGesture()
-                            .onChanged { value in
-                                // Only detect over-scroll when we're at the first item (position 0)
-                                // Position 0 is "All" - over-scroll creates new project
-                                guard viewModel.scrollPosition == 0 else { return }
-                                
-                                // Check if dragging right (positive translation = scrolling left)
-                                let dragDistance = value.translation.width
-                                if dragDistance > 0 {
-                                    viewModel.handleScrollOffset(dragDistance)
+                            DragGesture()
+                                .onChanged { value in
+                                    let translation = value.translation
+                                    
+                                    // Vertical drag gesture for menu control
+                                    if abs(translation.height) > abs(translation.width) * 1.5 {
+                                        if translation.height < -30 && !isMenuPresented {
+                                            // Drag up - open menu
+                                            Haptic.shared.lightImpact()
+                                            withAnimation(.snappy) {
+                                                isMenuPresented = true
+                                            }
+                                        } else if translation.height > 30 && isMenuPresented {
+                                            // Drag down - close menu
+                                            Haptic.shared.lightImpact()
+                                            withAnimation(.snappy) {
+                                                isMenuPresented = false
+                                            }
+                                        }
+                                    }
+                                    
+                                    // Horizontal over-scroll for new project creation
+                                    // Only detect over-scroll when we're at the first item (position 0)
+                                    guard viewModel.leftmostIndex == 0 else { return }
+                                    
+                                    // Check if dragging right (positive translation = scrolling left)
+                                    let dragDistance = translation.width
+                                    if dragDistance > 0 {
+                                        viewModel.handleScrollOffset(dragDistance)
+                                    }
+                                }
+                                .onEnded { value in
+                                    viewModel.handleScrollEnd()
+                                }
+                        )
+                        .onScrollTargetVisibilityChange(idType: Int.self) { ids in
+                            // Skip if we're doing a manual scroll to prevent double animation
+                            guard !viewModel.isManualScrolling else { return }
+                            
+                            // This detects when new items become visible, pick the first one as selected
+                            if let firstId = ids.first, firstId != viewModel.leftmostIndex {
+                                // Only update and trigger haptic when selection actually changes
+                                viewModel.leftmostIndex = firstId
+                                if firstId < allProjectOptions.count {
+                                    let option = allProjectOptions[firstId]
+                                    viewModel.selectedProject = option.projectModel
+                                    Haptic.shared.softImpact()
                                 }
                             }
-                            .onEnded { value in
-                                viewModel.handleScrollEnd()
-                            }
-                    )
-                    .onChange(of: viewModel.scrollPosition) { oldValue, newValue in
-                        viewModel.handleScrollPositionChange(
-                            newIndex: newValue,
-                            in: allProjectOptions,
-                            previousIndex: oldValue
-                        )
-                    }
+                        }
                 }
             }
             }

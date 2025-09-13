@@ -14,6 +14,7 @@ import SwiftUI
 struct StaticProjectIcon: View {
     let project: ProjectModel?
     let isThresholdReached: Bool
+    let isMenuPresented: Bool
     
     private var iconColor: Color {
         // Handle "All" project case (nil) - use gray as default
@@ -22,6 +23,11 @@ struct StaticProjectIcon: View {
     }
     
     private var iconName: String {
+        // Show x when menu is open
+        if isMenuPresented {
+            return "xmark"
+        }
+        
         // Show plus when threshold is reached
         if isThresholdReached {
             return "plus"
@@ -54,6 +60,6 @@ struct StaticProjectIcon: View {
 }
 
 #Preview {
-    StaticProjectIcon(project: nil, isThresholdReached: false)
+    StaticProjectIcon(project: nil, isThresholdReached: false, isMenuPresented: false)
         .background(.black)
 }
