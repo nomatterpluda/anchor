@@ -83,9 +83,10 @@ struct ToDoRowView: View {
                         onFlagToggled: { isFlagged in
                             // Flag state is already handled in the toolbar for existing tasks
                         },
-                        onProjectChanged: { project in
-                            // TODO: Handle project change for existing task
-                            print("Project changed for task: \(project?.projectName ?? "None")")
+                        onProjectChanged: { newProject in
+                            // Update the task's project directly
+                            todo.project = newProject
+                            todo.lastUpdate = .now
                         }
                     )
                 }

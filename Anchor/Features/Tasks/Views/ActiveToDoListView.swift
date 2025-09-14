@@ -131,9 +131,8 @@ struct ActiveToDoListView: View {
                                         onFlagToggled: { isFlagged in
                                             activeToDoListViewModel.newTaskFlagged = isFlagged
                                         },
-                                        onProjectChanged: { project in
-                                            // TODO: Handle project change
-                                            print("Project changed: \(project?.projectName ?? "None")")
+                                        onProjectChanged: { newProject in
+                                            activeToDoListViewModel.pendingProject = newProject
                                         }
                                     )
                                 }
@@ -143,11 +142,12 @@ struct ActiveToDoListView: View {
                                         Haptic.shared.mediumImpact()
                                     } else if oldValue && !newValue {
                                         // Text field lost focus (keyboard dismissed)
-                                        // Reset flag and date if no task was created
+                                        // Reset flag, date, and project if no task was created
                                         let trimmedText = activeToDoListViewModel.newTaskText.trimmingCharacters(in: .whitespacesAndNewlines)
                                         if trimmedText.isEmpty {
                                             activeToDoListViewModel.newTaskFlagged = false
                                             activeToDoListViewModel.newTaskDueDate = nil
+                                            activeToDoListViewModel.pendingProject = nil
                                         }
                                     }
                                 }

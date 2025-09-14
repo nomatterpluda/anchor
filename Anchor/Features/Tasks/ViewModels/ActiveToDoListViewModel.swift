@@ -9,6 +9,7 @@ class ActiveToDoListViewModel: ObservableObject {
     @Published var newTaskText: String = ""
     @Published var newTaskFlagged: Bool = false
     @Published var newTaskDueDate: Date? = nil
+    @Published var pendingProject: ProjectModel? = nil
     
     var context: ModelContext?
     
@@ -34,8 +35,8 @@ class ActiveToDoListViewModel: ObservableObject {
                 dueDate: newTaskDueDate
             )
             
-            // Use provided project (will be passed from calling view)
-            newToDo.project = project
+            // Use pending project if set, otherwise use provided project
+            newToDo.project = pendingProject ?? project
             
             // Apply flag state from toolbar
             newToDo.isFlagged = newTaskFlagged
@@ -44,6 +45,7 @@ class ActiveToDoListViewModel: ObservableObject {
             newTaskText = ""
             newTaskFlagged = false // Reset flag state for next task
             newTaskDueDate = nil // Reset date for next task
+            pendingProject = nil // Reset pending project for next task
         }
         dismissFocus()
     }
@@ -60,7 +62,6 @@ class ActiveToDoListViewModel: ObservableObject {
     func setCustomDate(_ date: Date) {
         newTaskDueDate = date
     }
-    
     
     // Delete task
     func deleteTask(todo: Todo) {

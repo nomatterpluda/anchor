@@ -17,6 +17,7 @@ struct TaskInputToolbar: ToolbarContent {
     // Toolbar state
     @State private var showDueDateOptions = false
     @State private var showDatePickerSheet = false
+    @State private var showProjectChangeSheet = false
     @State private var selectedProject: ProjectModel?
     
     // Bindings for external control
@@ -104,10 +105,23 @@ struct TaskInputToolbar: ToolbarContent {
                 // Change Project Button
                 Button(action: {
                     Haptic.shared.lightImpact()
-                    // TODO: Implement project change functionality
+                    showProjectChangeSheet = true
                 }) {
                     Image(systemName: "folder")
                         .font(.system(size: 16, weight: .medium))
+                }
+                .sheet(isPresented: $showProjectChangeSheet) {
+                    ProjectChangeSheet(
+                        currentProject: task?.project ?? currentProject,
+                        onProjectSelected: { newProject in
+                            // Call the callback to handle project change
+                            onProjectChanged(newProject)
+                            showProjectChangeSheet = false
+                        },
+                        onCancel: {
+                            showProjectChangeSheet = false
+                        }
+                    )
                 }
             }
         }
