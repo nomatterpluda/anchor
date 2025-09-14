@@ -20,6 +20,7 @@ class ProjectSelectionViewModel: ObservableObject {
     @Published var scrollPosition: Int? = 0
     @Published var leftmostIndex: Int = 0
     var isManualScrolling: Bool = false
+    var isViewReappearing: Bool = false
     @Published var showProjectMenu: Bool = false
     @Published var isCreatingProject: Bool = false
     
@@ -39,6 +40,9 @@ class ProjectSelectionViewModel: ObservableObject {
     var onDeleteFlowComplete: (() -> Void)?
     
     var context: ModelContext?
+    
+    // Track if we've already initialized to prevent unwanted resets
+    private var hasInitialized = false
     
     // Private state for haptic management
     private var isContinuousHapticActive: Bool = false
@@ -90,6 +94,9 @@ class ProjectSelectionViewModel: ObservableObject {
     
     // Initialize with default state
     func initializeDefaultState(with projects: [ProjectModel]) {
+        // Only initialize once to prevent scroll position resets
+        guard !hasInitialized else { return }
+        
         // Start with first project if available, otherwise "All"
         if let firstProject = projects.first {
             selectedProject = firstProject
@@ -97,6 +104,8 @@ class ProjectSelectionViewModel: ObservableObject {
             selectedProject = nil // "All" when no projects exist
         }
         scrollPosition = 0
+        leftmostIndex = 0
+        hasInitialized = true
     }
     
     // MARK: - Project Management (from ProjectViewModel)

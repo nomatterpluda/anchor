@@ -129,8 +129,8 @@ struct ProjectSelectorBar: View {
                                 }
                         )
                         .onScrollTargetVisibilityChange(idType: Int.self) { ids in
-                            // Skip if we're doing a manual scroll to prevent double animation
-                            guard !viewModel.isManualScrolling else { return }
+                            // Skip if we're doing a manual scroll or view is reappearing
+                            guard !viewModel.isManualScrolling && !viewModel.isViewReappearing else { return }
                             
                             // This detects when new items become visible, pick the first one as selected
                             if let firstId = ids.first, firstId != viewModel.leftmostIndex {
@@ -141,6 +141,12 @@ struct ProjectSelectorBar: View {
                                     viewModel.selectedProject = option.projectModel
                                     Haptic.shared.softImpact()
                                 }
+                            }
+                        }
+                        .onAppear {
+                            // Restore scroll position when view appears
+                            if viewModel.leftmostIndex > 0 {
+                                proxy.scrollTo(viewModel.leftmostIndex, anchor: .leading)
                             }
                         }
                 }

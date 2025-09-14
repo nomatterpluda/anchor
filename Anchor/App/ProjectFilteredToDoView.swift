@@ -78,6 +78,15 @@ struct ProjectFilteredToDoView: View {
                 // Dismiss menu when user starts typing
                 isMenuPresented = false
             }
+            
+            if !isFocused {
+                // Keyboard dismissed, ProjectSelectorBar is reappearing
+                projectSelectionViewModel.isViewReappearing = true
+                // Reset flag after scroll position stabilizes
+                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                    projectSelectionViewModel.isViewReappearing = false
+                }
+            }
         }
         .onAppear {
             SampleDataService.createSampleProjectsIfNeeded(
