@@ -11,9 +11,11 @@
  */
 
 import SwiftUI
+import SwiftData
 
 struct AddProjectSheet: View {
-    @ObservedObject var viewModel: ProjectSelectionViewModel
+    @ObservedObject var managementViewModel: ProjectManagementViewModel
+    @ObservedObject var selectionViewModel: ProjectSelectionViewModel
     
     // Form state
     @State private var projectName: String = ""
@@ -93,7 +95,7 @@ struct AddProjectSheet: View {
         HStack(spacing: 15) {
             Button {
                 Haptic.shared.lightImpact()
-                viewModel.showNewProjectSheet = false
+                managementViewModel.showNewProjectSheet = false
             } label: {
                 Text("Cancel")
                     .frame(maxWidth: .infinity)
@@ -124,11 +126,14 @@ struct AddProjectSheet: View {
         guard !trimmedName.isEmpty else { return }
         
         Haptic.shared.mediumImpact()
-        viewModel.createProject(name: trimmedName, icon: selectedIcon, color: selectedColor)
-        viewModel.showNewProjectSheet = false
+        managementViewModel.createProject(name: trimmedName, icon: selectedIcon, color: selectedColor)
+        managementViewModel.showNewProjectSheet = false
     }
 }
 
 #Preview {
-    AddProjectSheet(viewModel: ProjectSelectionViewModel())
+    AddProjectSheet(
+        managementViewModel: ProjectManagementViewModel(),
+        selectionViewModel: ProjectSelectionViewModel()
+    )
 }

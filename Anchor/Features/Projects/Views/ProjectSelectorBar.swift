@@ -16,8 +16,9 @@ struct ProjectSelectorBar: View {
     // Data
     let projects: [ProjectModel]
     
-    // ViewModel
-    @ObservedObject var viewModel: ProjectSelectionViewModel
+    // ViewModels
+    @ObservedObject var selectionViewModel: ProjectSelectionViewModel
+    @ObservedObject var overScrollViewModel: OverScrollViewModel
     
     // Menu State (passed from parent)
     @Binding var isMenuPresented: Bool
@@ -27,22 +28,7 @@ struct ProjectSelectorBar: View {
     
     // Computed Properties
     private var allProjectOptions: [ProjectOption] {
-        viewModel.getAllProjectOptions(from: projects)
-    }
-    
-    // Calculate drag progress (0-1) for UI animations
-    private var dragProgress: CGFloat {
-        min(viewModel.overScrollProgress / 120, 1.0)
-    }
-    
-    // Calculate "Add" text width based on drag progress
-    private var addTextWidth: CGFloat {
-        dragProgress * 80 // Max width of 80pt for "Add" text (increased for larger font)
-    }
-    
-    // Calculate project titles opacity - fade out as drag progresses
-    private var projectTitlesOpacity: Double {
-        max(0, 1.0 - dragProgress) // Fade from 1.0 to 0.0 as drag progresses
+        selectionViewModel.getAllProjectOptions(from: projects)
     }
     
     private func getActiveTaskCount(for option: ProjectOption) -> Int {
@@ -59,10 +45,10 @@ struct ProjectSelectorBar: View {
             HStack(spacing: 10) {
                 // Static project icon (left side) - tappable
                 StaticProjectIcon(
-                    project: viewModel.selectedProject,
-                    isThresholdReached: viewModel.isThresholdReached,
+                    project: selectionViewModel.selectedProject,
+                    isThresholdReached: overScrollViewModel.isThresholdReached,
                     isMenuPresented: isMenuPresented,
-                    dragProgress: dragProgress
+                    dragProgress: overScrollViewModel.dragProgress
                 )
                     .onTapGesture {
                         Haptic.shared.lightImpact()
@@ -80,9 +66,9 @@ struct ProjectSelectorBar: View {
                         .fixedSize(horizontal: true, vertical: false)
                     Spacer(minLength: 0)
                 }
-                .frame(width: addTextWidth, alignment: .leading)
+                .frame(width: overScrollViewModel.addTextWidth, alignment: .leading)
                 .clipped()
-                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: addTextWidth)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: overScrollViewModel.addTextWidth)
                 
                 // Scrollable project list (right side) - fade non-selected when menu open
                 GeometryReader { geometry in
@@ -93,25 +79,25 @@ struct ProjectSelectorBar: View {
                                     ProjectListItem(
                                         name: option.name,
                                         activeTaskCount: getActiveTaskCount(for: option),
-                                        isSelected: index == viewModel.leftmostIndex
+                                        isSelected: index == selectionViewModel.leftmostIndex
                                     ) {
                                         // If this is the selected project, toggle menu instead of selecting
-                                        if index == viewModel.leftmostIndex {
+                                        if index == selectionViewModel.leftmostIndex {
                                             Haptic.shared.lightImpact()
                                             withAnimation(.snappy) {
                                                 isMenuPresented.toggle()
                                             }
                                         } else {
                                             // Handle selection through ViewModel
-                                            viewModel.selectProject(option, at: index) { scrollIndex in
+                                            selectionViewModel.selectProject(option, at: index) { scrollIndex in
                                                 withAnimation(.easeOut(duration: 0.3)) {
                                                     proxy.scrollTo(scrollIndex, anchor: .leading)
                                                 }
                                             }
                                         }
                                     }
-                                    .opacity(isMenuPresented && index != viewModel.leftmostIndex ? 0.0 : 1.0)
-                                    .allowsHitTesting(!(isMenuPresented && index != viewModel.leftmostIndex))
+                                    .opacity(isMenuPresented && index != selectionViewModel.leftmostIndex ? 0.0 : 1.0)
+                                    .allowsHitTesting(!(isMenuPresented && index != selectionViewModel.leftmostIndex))
                                     .id(index)
                                 }
                             }
@@ -145,42 +131,42 @@ struct ProjectSelectorBar: View {
                                     
                                     // Horizontal over-scroll for new project creation
                                     // Only detect over-scroll when we're at the first item (position 0)
-                                    guard viewModel.leftmostIndex == 0 else { return }
+                                    guard selectionViewModel.leftmostIndex == 0 else { return }
                                     
                                     // Check if dragging right (positive translation = scrolling left)
                                     let dragDistance = translation.width
                                     if dragDistance > 0 {
-                                        viewModel.handleScrollOffset(dragDistance)
+                                        overScrollViewModel.handleScrollOffset(dragDistance)
                                     }
                                 }
                                 .onEnded { value in
-                                    viewModel.handleScrollEnd()
+                                    overScrollViewModel.handleScrollEnd()
                                 }
                         )
                         .onScrollTargetVisibilityChange(idType: Int.self) { ids in
                             // Skip if we're doing a manual scroll or view is reappearing
-                            guard !viewModel.isManualScrolling && !viewModel.isViewReappearing else { return }
+                            guard !selectionViewModel.isManualScrolling && !selectionViewModel.isViewReappearing else { return }
                             
                             // This detects when new items become visible, pick the first one as selected
-                            if let firstId = ids.first, firstId != viewModel.leftmostIndex {
+                            if let firstId = ids.first, firstId != selectionViewModel.leftmostIndex {
                                 // Only update and trigger haptic when selection actually changes
-                                viewModel.leftmostIndex = firstId
+                                selectionViewModel.leftmostIndex = firstId
                                 if firstId < allProjectOptions.count {
                                     let option = allProjectOptions[firstId]
-                                    viewModel.selectedProject = option.projectModel
+                                    selectionViewModel.selectedProject = option.projectModel
                                     Haptic.shared.softImpact()
                                 }
                             }
                         }
                         .onAppear {
                             // Restore scroll position when view appears
-                            if viewModel.leftmostIndex > 0 {
-                                proxy.scrollTo(viewModel.leftmostIndex, anchor: .leading)
+                            if selectionViewModel.leftmostIndex > 0 {
+                                proxy.scrollTo(selectionViewModel.leftmostIndex, anchor: .leading)
                             }
                         }
                 }
-                .opacity(projectTitlesOpacity)
-                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: projectTitlesOpacity)
+                .opacity(overScrollViewModel.projectTitlesOpacity)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: overScrollViewModel.projectTitlesOpacity)
             }
             }
         }
@@ -193,9 +179,6 @@ struct ProjectSelectorBar: View {
                 .fill(Color.black.opacity(0.95))
                 .ignoresSafeArea(edges: .bottom)
         )
-        .sheet(isPresented: $viewModel.showNewProjectSheet) {
-            AddProjectSheet(viewModel: viewModel)
-        }
         .ignoresSafeArea(.keyboard)
     }
 }

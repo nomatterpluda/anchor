@@ -15,6 +15,8 @@ import SwiftData
 struct ProjectFilteredToDoView: View {
     @Query(sort: [SortDescriptor(\ProjectModel.orderIndex)]) private var projects: [ProjectModel]
     @StateObject private var projectSelectionViewModel = ProjectSelectionViewModel()
+    @StateObject private var projectManagementViewModel = ProjectManagementViewModel()
+    @StateObject private var overScrollViewModel = OverScrollViewModel()
     @Environment(\.modelContext) private var context
     
     // Menu State
@@ -48,7 +50,8 @@ struct ProjectFilteredToDoView: View {
                 if !isAnyTextFieldFocused {
                     ProjectSelectorBar(
                         projects: projects,
-                        viewModel: projectSelectionViewModel,
+                        selectionViewModel: projectSelectionViewModel,
+                        overScrollViewModel: overScrollViewModel,
                         isMenuPresented: $isMenuPresented
                     )
                     .fixedSize(horizontal: false, vertical: true)
@@ -64,7 +67,8 @@ struct ProjectFilteredToDoView: View {
                         ProjectMenuView(
                             isPresented: $isMenuPresented,
                             project: projectSelectionViewModel.selectedProject,
-                            viewModel: projectSelectionViewModel
+                            selectionViewModel: projectSelectionViewModel,
+                            managementViewModel: projectManagementViewModel
                         )
                         .transition(.move(edge: .bottom).combined(with: .opacity))
                     }
@@ -94,30 +98,43 @@ struct ProjectFilteredToDoView: View {
                 projects: projects
             )
             projectSelectionViewModel.context = context
+            projectManagementViewModel.context = context
             projectSelectionViewModel.initializeDefaultState(with: projects)
-        }
-        .sheet(isPresented: $projectSelectionViewModel.showEditProjectSheet) {
-            if let selectedProject = projectSelectionViewModel.selectedProject {
-                EditProjectSheet(viewModel: projectSelectionViewModel, project: selectedProject)
+            
+            // Set up callbacks
+            overScrollViewModel.onThresholdReached = {
+                projectManagementViewModel.showNewProjectSheet = true
+            }
+            
+            projectManagementViewModel.onDeleteFlowComplete = {
+                isMenuPresented = false
             }
         }
-        .sheet(isPresented: $projectSelectionViewModel.showSettingsSheet) {
+        .sheet(isPresented: $projectManagementViewModel.showEditProjectSheet) {
+            if let selectedProject = projectSelectionViewModel.selectedProject {
+                EditProjectSheet(managementViewModel: projectManagementViewModel, selectionViewModel: projectSelectionViewModel, project: selectedProject)
+            }
+        }
+        .sheet(isPresented: $projectManagementViewModel.showSettingsSheet) {
             SettingsView()
         }
-        .sheet(isPresented: $projectSelectionViewModel.showReorderSheet) {
-            ProjectReorderSheet(viewModel: projectSelectionViewModel)
+        .sheet(isPresented: $projectManagementViewModel.showReorderSheet) {
+            ProjectReorderSheet(managementViewModel: projectManagementViewModel)
+        }
+        .sheet(isPresented: $projectManagementViewModel.showNewProjectSheet) {
+            AddProjectSheet(managementViewModel: projectManagementViewModel, selectionViewModel: projectSelectionViewModel)
         }
         .alert(
-            "Delete project \"\(projectSelectionViewModel.projectToDelete?.projectName ?? "")\"?",
-            isPresented: $projectSelectionViewModel.showDeleteConfirmation
+            "Delete project \"\(projectManagementViewModel.projectToDelete?.projectName ?? "")\"?",
+            isPresented: $projectManagementViewModel.showDeleteConfirmation
         ) {
             Button("Delete", role: .destructive) {
                 withAnimation(.easeInOut(duration: 0.3)) {
-                    projectSelectionViewModel.confirmDeleteProject()
+                    projectManagementViewModel.confirmDeleteProject()
                 }
             }
             Button("Cancel", role: .cancel) {
-                projectSelectionViewModel.cancelDeleteConfirmation()
+                projectManagementViewModel.cancelDeleteConfirmation()
             }
         } message: {
             Text("This will delete all the Tasks in this Project.")

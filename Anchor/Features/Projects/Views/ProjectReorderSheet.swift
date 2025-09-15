@@ -13,11 +13,11 @@ import SwiftUI
 import SwiftData
 
 struct ProjectReorderSheet: View {
-    @ObservedObject var viewModel: ProjectSelectionViewModel
+    @ObservedObject var managementViewModel: ProjectManagementViewModel
     
     var body: some View {
         DynamicSheet(animation: .snappy(duration: 0.3)) {
-            ProjectReorderSheetContent(viewModel: viewModel)
+            ProjectReorderSheetContent(managementViewModel: managementViewModel)
         }
         .presentationBackground(.clear)
         .presentationDragIndicator(.hidden)
@@ -27,7 +27,7 @@ struct ProjectReorderSheet: View {
 // MARK: - Project Reorder Sheet Content
 
 struct ProjectReorderSheetContent: View {
-    @ObservedObject var viewModel: ProjectSelectionViewModel
+    @ObservedObject var managementViewModel: ProjectManagementViewModel
     @Query(sort: [SortDescriptor(\ProjectModel.orderIndex)]) private var projects: [ProjectModel]
     
     // Local state for reordering (changes only applied on Save)
@@ -126,7 +126,7 @@ struct ProjectReorderSheetContent: View {
     
     private func handleCancel() {
         Haptic.shared.lightImpact()
-        viewModel.showReorderSheet = false
+        managementViewModel.showReorderSheet = false
     }
     
     private func handleSave() {
@@ -137,16 +137,16 @@ struct ProjectReorderSheetContent: View {
             project.orderIndex = index
         }
         
-        viewModel.saveReorderChanges()
+        managementViewModel.saveReorderChanges()
     }
     
     private func handleAddProject() {
         Haptic.shared.lightImpact()
-        viewModel.showReorderSheet = false
+        managementViewModel.showReorderSheet = false
         
         // Open add project sheet after a small delay
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-            viewModel.showNewProjectSheet = true
+            managementViewModel.showNewProjectSheet = true
         }
     }
 }
@@ -211,7 +211,7 @@ struct AddProjectRow: View {
 }
 
 #Preview {
-    @Previewable @State var viewModel = ProjectSelectionViewModel()
+    @Previewable @State var managementViewModel = ProjectManagementViewModel()
     
     let container = try! ModelContainer(for: ProjectModel.self, Todo.self, configurations: ModelConfiguration(isStoredInMemoryOnly: true))
     
@@ -231,7 +231,7 @@ struct AddProjectRow: View {
         container.mainContext.insert(project)
     }
     
-    return ProjectReorderSheet(viewModel: viewModel)
+    return ProjectReorderSheet(managementViewModel: managementViewModel)
         .modelContainer(container)
         .background(Color.black)
 }

@@ -14,7 +14,8 @@
 import SwiftUI
 
 struct EditProjectSheet: View {
-    @ObservedObject var viewModel: ProjectSelectionViewModel
+    @ObservedObject var managementViewModel: ProjectManagementViewModel
+    @ObservedObject var selectionViewModel: ProjectSelectionViewModel
     let project: ProjectModel
     
     // Form state - initialized with project details
@@ -25,8 +26,9 @@ struct EditProjectSheet: View {
     
     // MARK: - Initializer
     
-    init(viewModel: ProjectSelectionViewModel, project: ProjectModel) {
-        self.viewModel = viewModel
+    init(managementViewModel: ProjectManagementViewModel, selectionViewModel: ProjectSelectionViewModel, project: ProjectModel) {
+        self.managementViewModel = managementViewModel
+        self.selectionViewModel = selectionViewModel
         self.project = project
         self._projectName = State(initialValue: project.projectName)
         self._selectedColor = State(initialValue: project.projectColor)
@@ -98,7 +100,7 @@ struct EditProjectSheet: View {
         HStack(spacing: 15) {
             Button {
                 Haptic.shared.lightImpact()
-                viewModel.showEditProjectSheet = false
+                managementViewModel.showEditProjectSheet = false
             } label: {
                 Text("Cancel")
                     .frame(maxWidth: .infinity)
@@ -130,7 +132,7 @@ struct EditProjectSheet: View {
         
         Haptic.shared.mediumImpact()
         updateProject(name: trimmedName, icon: selectedIcon, color: selectedColor)
-        viewModel.showEditProjectSheet = false
+        managementViewModel.showEditProjectSheet = false
     }
     
     private func updateProject(name: String, icon: String, color: String) {
@@ -143,5 +145,9 @@ struct EditProjectSheet: View {
 
 #Preview {
     let sampleProject = ProjectModel(name: "Sample Project", icon: "folder.fill", color: "blue")
-    EditProjectSheet(viewModel: ProjectSelectionViewModel(), project: sampleProject)
+    EditProjectSheet(
+        managementViewModel: ProjectManagementViewModel(),
+        selectionViewModel: ProjectSelectionViewModel(),
+        project: sampleProject
+    )
 }

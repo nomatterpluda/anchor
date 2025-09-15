@@ -15,32 +15,32 @@ import SwiftData
 struct ProjectMenuView: View {
     @Binding var isPresented: Bool
     let project: ProjectModel?
-    @ObservedObject var viewModel: ProjectSelectionViewModel
+    @ObservedObject var selectionViewModel: ProjectSelectionViewModel
+    @ObservedObject var managementViewModel: ProjectManagementViewModel
     
     var body: some View {
-        GlassEffectContainer {
-            VStack(spacing: 20) {
+        VStack(spacing: 20) {
                 // 3 Button HStack - Different buttons for "All" project vs regular projects
                 HStack(spacing: 15) {
                     if project == nil {
                         // All Project Menu: Settings | Add Project | Reorder
                         MenuButton(icon: "gearshape", title: "Settings") {
                             Haptic.shared.lightImpact()
-                            viewModel.showSettingsSheet = true
+                            managementViewModel.showSettingsSheet = true
                             withAnimation(.snappy) {
                                 isPresented = false
                             }
                         }
                         MenuButton(icon: "plus", title: "Project") {
                             Haptic.shared.lightImpact()
-                            viewModel.showNewProjectSheet = true
+                            managementViewModel.showNewProjectSheet = true
                             withAnimation(.snappy) {
                                 isPresented = false
                             }
                         }
                         MenuButton(icon: "line.3.horizontal", title: "Reorder") {
                             Haptic.shared.lightImpact()
-                            viewModel.showReorderSheet = true
+                            managementViewModel.showReorderSheet = true
                             withAnimation(.snappy) {
                                 isPresented = false
                             }
@@ -50,20 +50,20 @@ struct ProjectMenuView: View {
                         MenuButton(icon: "trash", title: "Delete") {
                             Haptic.shared.lightImpact()
                             if let project = project {
-                                viewModel.showDeleteConfirmation(for: project)
+                                managementViewModel.showDeleteConfirmation(for: project)
                             }
                             // Menu stays open - alert will handle the user flow
                         }
                         MenuButton(icon: "pencil", title: "Edit") {
                             Haptic.shared.lightImpact()
-                            viewModel.showEditProjectSheet = true
+                            managementViewModel.showEditProjectSheet = true
                             withAnimation(.snappy) {
                                 isPresented = false
                             }
                         }
                         MenuButton(icon: "line.3.horizontal", title: "Reorder") {
                             Haptic.shared.lightImpact()
-                            viewModel.showReorderSheet = true
+                            managementViewModel.showReorderSheet = true
                             withAnimation(.snappy) {
                                 isPresented = false
                             }
@@ -87,13 +87,12 @@ struct ProjectMenuView: View {
                 }
                 .glassEffect(in: RoundedRectangle(cornerRadius: 20))
                 */
-            }
-            .padding(.horizontal, 16)
-            .padding(.bottom, 36)
         }
+        .padding(.horizontal, 16)
+        .padding(.bottom, 36)
         .onAppear {
             // Set up callback to close menu when deletion flow completes
-            viewModel.onDeleteFlowComplete = {
+            managementViewModel.onDeleteFlowComplete = {
                 withAnimation(.snappy) {
                     isPresented = false
                 }
@@ -112,7 +111,8 @@ struct ProjectMenuView: View {
         ProjectMenuView(
             isPresented: $isPresented,
             project: nil,
-            viewModel: ProjectSelectionViewModel()
+            selectionViewModel: ProjectSelectionViewModel(),
+            managementViewModel: ProjectManagementViewModel()
         )
     }
 }
