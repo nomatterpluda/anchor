@@ -47,7 +47,7 @@ class ProjectSelectionViewModel: ObservableObject {
     // Private state for haptic management
     private var isContinuousHapticActive: Bool = false
     private var hasTriggeredThresholdHaptic: Bool = false
-    private let overScrollThreshold: CGFloat = 200
+    private let overScrollThreshold: CGFloat = 120
     
     // MARK: - Project Selection Logic
     
@@ -236,10 +236,13 @@ class ProjectSelectionViewModel: ObservableObject {
         resetOverScroll()
     }
     
-    // Reset over-scroll state
+    // Reset over-scroll state with smooth animation
     func resetOverScroll() {
-        overScrollProgress = 0
-        isThresholdReached = false
+        // Use withAnimation to ensure smooth reset
+        withAnimation(.spring(response: 0.5, dampingFraction: 0.8)) {
+            overScrollProgress = 0
+            isThresholdReached = false
+        }
         hasTriggeredThresholdHaptic = false
         // Stop continuous haptic when gesture ends
         if isContinuousHapticActive {

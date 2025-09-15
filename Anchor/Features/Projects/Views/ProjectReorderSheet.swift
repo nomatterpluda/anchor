@@ -159,7 +159,7 @@ struct ProjectReorderRow: View {
     var body: some View {
         HStack(spacing: 16) {
             // Project icon
-            StaticProjectIcon(project: project, isThresholdReached: false, isMenuPresented: false)
+            StaticProjectIcon(project: project, isThresholdReached: false, isMenuPresented: false, dragProgress: 0)
             
             // Project name and task count
             HStack(alignment: .firstTextBaseline, spacing: 5) {

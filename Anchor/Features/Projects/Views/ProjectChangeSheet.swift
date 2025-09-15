@@ -149,7 +149,8 @@ struct ProjectSelectionRow: View {
                 StaticProjectIcon(
                     project: project,
                     isThresholdReached: false,
-                    isMenuPresented: false
+                    isMenuPresented: false,
+                    dragProgress: 0
                 )
                 
                 // Project name and task count

@@ -15,6 +15,7 @@ struct StaticProjectIcon: View {
     let project: ProjectModel?
     let isThresholdReached: Bool
     let isMenuPresented: Bool
+    let dragProgress: CGFloat // 0-1 progress for stroke animation
     
     private var iconColor: Color {
         // Handle "All" project case (nil) - use gray as default
@@ -28,8 +29,8 @@ struct StaticProjectIcon: View {
             return "xmark"
         }
         
-        // Show plus when threshold is reached
-        if isThresholdReached {
+        // Show plus when dragging (any progress > 0)
+        if dragProgress > 0 {
             return "plus"
         }
         
@@ -44,22 +45,35 @@ struct StaticProjectIcon: View {
     }
     
     var body: some View {
-        Circle()
-            .fill(iconColor)
-            .frame(width: 34, height: 34)
-            .animation(.snappy(duration: 0.3), value: iconColor)
-            .overlay(
-                Image(systemName: iconName)
-                    .font(.system(size: 16, weight: .bold))
-                    .foregroundStyle(.white)
-                    .scaleEffect(iconScale)
-                    .animation(.snappy(duration: 0.3), value: iconName)
-                    .animation(.snappy(duration: 0.2), value: iconScale)
-            )
+        ZStack {
+            // Background circle
+            Circle()
+                .fill(dragProgress > 0 ? .clear : iconColor)
+                .frame(width: 34, height: 34)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: iconColor)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: dragProgress)
+            
+            // Progressive stroke - always present but with conditional opacity
+            Circle()
+                .trim(from: 0, to: dragProgress)
+                .stroke(.white, lineWidth: 2)
+                .frame(width: 34, height: 34)
+                .rotationEffect(.degrees(-90)) // Start from top
+                .opacity(dragProgress > 0 ? 1.0 : 0.0)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: dragProgress)
+            
+            // Icon
+            Image(systemName: iconName)
+                .font(.system(size: 16, weight: .bold))
+                .foregroundStyle(dragProgress > 0 ? .white : .white)
+                .scaleEffect(iconScale)
+                .animation(.snappy(duration: 0.3), value: iconName)
+                .animation(.snappy(duration: 0.2), value: iconScale)
+        }
     }
 }
 
 #Preview {
-    StaticProjectIcon(project: nil, isThresholdReached: false, isMenuPresented: false)
+    StaticProjectIcon(project: nil, isThresholdReached: false, isMenuPresented: false, dragProgress: 0.5)
         .background(.black)
 }

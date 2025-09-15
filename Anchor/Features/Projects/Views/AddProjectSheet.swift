@@ -68,7 +68,7 @@ struct AddProjectSheet: View {
     // MARK: - Header Section
     private var headerSection: some View {
         HStack(spacing: 16) {
-            StaticProjectIcon(project: mockProject, isThresholdReached: false, isMenuPresented: false)
+            StaticProjectIcon(project: mockProject, isThresholdReached: false, isMenuPresented: false, dragProgress: 0)
             
             TextField("Project Name", text: $projectName)
                 .font(.system(size: 34, weight: .bold, design: .rounded))

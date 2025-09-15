@@ -30,6 +30,21 @@ struct ProjectSelectorBar: View {
         viewModel.getAllProjectOptions(from: projects)
     }
     
+    // Calculate drag progress (0-1) for UI animations
+    private var dragProgress: CGFloat {
+        min(viewModel.overScrollProgress / 120, 1.0)
+    }
+    
+    // Calculate "Add" text width based on drag progress
+    private var addTextWidth: CGFloat {
+        dragProgress * 80 // Max width of 80pt for "Add" text (increased for larger font)
+    }
+    
+    // Calculate project titles opacity - fade out as drag progresses
+    private var projectTitlesOpacity: Double {
+        max(0, 1.0 - dragProgress) // Fade from 1.0 to 0.0 as drag progresses
+    }
+    
     private func getActiveTaskCount(for option: ProjectOption) -> Int {
         switch option {
         case .all:
@@ -46,7 +61,8 @@ struct ProjectSelectorBar: View {
                 StaticProjectIcon(
                     project: viewModel.selectedProject,
                     isThresholdReached: viewModel.isThresholdReached,
-                    isMenuPresented: isMenuPresented
+                    isMenuPresented: isMenuPresented,
+                    dragProgress: dragProgress
                 )
                     .onTapGesture {
                         Haptic.shared.lightImpact()
@@ -54,6 +70,19 @@ struct ProjectSelectorBar: View {
                             isMenuPresented.toggle()
                         }
                     }
+                
+                // Reveal-style "Add" text
+                HStack {
+                    Text("Add")
+                        .font(.system(size: 34, weight: .bold, design: .rounded))
+                        .foregroundStyle(.white)
+                        .lineLimit(1)
+                        .fixedSize(horizontal: true, vertical: false)
+                    Spacer(minLength: 0)
+                }
+                .frame(width: addTextWidth, alignment: .leading)
+                .clipped()
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: addTextWidth)
                 
                 // Scrollable project list (right side) - fade non-selected when menu open
                 GeometryReader { geometry in
@@ -150,6 +179,8 @@ struct ProjectSelectorBar: View {
                             }
                         }
                 }
+                .opacity(projectTitlesOpacity)
+                .animation(.spring(response: 0.5, dampingFraction: 0.8), value: projectTitlesOpacity)
             }
             }
         }
