@@ -186,7 +186,7 @@ struct ProjectSelectorBar: View {
         }
         .padding(.leading, 16)
         .padding(.top, 32)
-        .padding(.bottom, isMenuPresented ? 20 : 20)
+        .padding(.bottom, isMenuPresented ? 20 : 36)
         .padding(.trailing, 0)
         .background(
             Rectangle()

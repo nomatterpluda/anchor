@@ -50,7 +50,7 @@ struct CalendarDateBar: View {
                     insertion: .scale(scale: 1.1).combined(with: .opacity),
                     removal: .scale(scale: 0.9).combined(with: .opacity)
                 ))
-                .id("month-\(viewModel.currentDate)")
+                .id("month-\(viewModel.monthString)")
             
             // Right: Day number
             Text(viewModel.dayNumberString)
