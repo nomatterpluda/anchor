@@ -68,6 +68,12 @@ struct CalendarDateBar: View {
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.3), value: viewModel.currentDate)
         .padding(.bottom, 16)
+        .overlay(alignment: .top) {
+            // Top border separator line
+            Rectangle()
+                .fill(Color.black.opacity(0.05))
+                .frame(height: 1)
+        }
     }
 }
 
