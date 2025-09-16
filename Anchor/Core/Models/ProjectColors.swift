@@ -66,3 +66,47 @@ struct ProjectColors {
         return allColors.randomElement()?.id ?? defaultColorID
     }
 }
+
+// MARK: - Time Block Color Palette
+extension ProjectColors {
+    
+    /// Time block color variants for a given project color
+    struct TimeBlockPalette {
+        let main: Color      // Project color at 100%
+        let mid: Color       // Project color at 20% + black at 30%
+        let dark: Color      // Project color at 100% + black at 50%
+        let light: Color     // Project color at 20%
+    }
+    
+    /// Get time block color palette for a project color ID
+    static func timeBlockPalette(for colorID: String) -> TimeBlockPalette {
+        let baseColor = swiftUIColor(for: colorID)
+        
+        return TimeBlockPalette(
+            main: baseColor,                    // Project color at 100%
+            mid: baseColor.opacity(0.6),        // Mid-tone version
+            dark: baseColor.opacity(0.8),       // Darker version  
+            light: baseColor.opacity(0.2)       // Light version (20%)
+        )
+    }
+    
+    /// Convenience method to get specific color variant
+    enum TimeBlockColorVariant {
+        case main, mid, dark, light
+    }
+    
+    static func timeBlockColor(for colorID: String, variant: TimeBlockColorVariant) -> Color {
+        let palette = timeBlockPalette(for: colorID)
+        
+        switch variant {
+        case .main:
+            return palette.main
+        case .mid:
+            return palette.mid
+        case .dark:
+            return palette.dark
+        case .light:
+            return palette.light
+        }
+    }
+}

@@ -19,7 +19,7 @@ struct AnchorApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .modelContainer(for: [Todo.self, ProjectModel.self])
+                .modelContainer(for: [Todo.self, ProjectModel.self, TimeBlock.self, TimeBlockAssignment.self])
         }
         .environmentObject(activeToDoListViewModel)
         .environmentObject(completedToDoListViewModel)
