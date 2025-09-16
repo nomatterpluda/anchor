@@ -10,7 +10,7 @@
 
 import Foundation
 import SwiftUI
-import Combine
+internal import Combine
 
 class DailyCalendarViewModel: ObservableObject {
     

@@ -10,7 +10,7 @@
 
 import Foundation
 import SwiftUI
-import Combine
+internal import Combine
 
 class CalendarOverlayViewModel: ObservableObject {
     
@@ -52,7 +52,7 @@ class CalendarOverlayViewModel: ObservableObject {
     }
     
     /// Handle drag gesture end with position snapping
-    func handleDragEnd(translation: CGPoint, predictedTranslation: CGPoint, screenHeight: CGFloat) {
+    func handleDragEnd(translation: CGSize, predictedTranslation: CGSize, screenHeight: CGFloat) {
         guard dragStartedInDateSection else { return }
         
         let dragRatio = translation.height / screenHeight
