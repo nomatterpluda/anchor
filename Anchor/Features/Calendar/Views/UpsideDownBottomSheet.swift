@@ -16,16 +16,18 @@ struct UpsideDownBottomSheet: View {
     let minHeightRatio: CGFloat
     let midHeightRatio: CGFloat
     let maxHeightRatio: CGFloat
+    @ObservedObject var overlayViewModel: CalendarOverlayViewModel
     
     // ViewModels
-    @StateObject private var overlayViewModel = CalendarOverlayViewModel()
     @StateObject private var calendarViewModel = DailyCalendarViewModel()
     
     @GestureState private var dragOffset: CGFloat = 0
     
     // Computed properties
     private var liveSheetRatio: CGFloat {
-        overlayViewModel.liveSheetRatio(dragOffset: dragOffset, screenHeight: geometry.size.height)
+        // Combine both local drag offset and edge drag offset for smooth continuous dragging
+        let totalDragOffset = dragOffset + overlayViewModel.edgeDragOffset
+        return overlayViewModel.liveSheetRatio(dragOffset: totalDragOffset, screenHeight: geometry.size.height)
     }
     
     var body: some View {
@@ -69,17 +71,7 @@ struct UpsideDownBottomSheet: View {
                         predictedTranslation: value.predictedEndTranslation,
                         screenHeight: geometry.size.height
                     )
-                    // Sync the binding with ViewModel state
-                    sheetPosition = overlayViewModel.sheetPosition
                 }
         )
-        .onAppear {
-            // Sync initial state
-            overlayViewModel.sheetPosition = sheetPosition
-        }
-        .onChange(of: overlayViewModel.sheetPosition) { _, newPosition in
-            // Keep binding in sync
-            sheetPosition = newPosition
-        }
     }
 }

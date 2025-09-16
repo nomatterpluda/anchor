@@ -64,10 +64,10 @@ struct CalendarDateBar: View {
         }
         .padding(.horizontal, 20)
         .padding(.bottom, 36)
-        .padding(.top, 25)
+        .padding(.top, 10)
         .contentShape(Rectangle())
         .animation(.easeInOut(duration: 0.3), value: viewModel.currentDate)
-        .padding(.bottom, 16)
+        .padding(.bottom, 10)
         .overlay(alignment: .top) {
             // Top border separator line
             Rectangle()

@@ -17,6 +17,7 @@ class CalendarOverlayViewModel: ObservableObject {
     // MARK: - Published Properties
     @Published var sheetPosition: CGFloat = 0.5 // Default to middle position
     @Published var dragStartedInDateSection: Bool = false
+    @Published var edgeDragOffset: CGFloat = 0 // For continuous edge dragging
     
     // MARK: - Constants
     let minHeightRatio: CGFloat = 0.2
@@ -48,6 +49,18 @@ class CalendarOverlayViewModel: ObservableObject {
         // No haptic feedback on drag start
     }
     
+    /// Handle edge swipe gesture start
+    func handleEdgeSwipeStart() {
+        dragStartedInDateSection = true // Enable dragging from edge
+        edgeDragOffset = 0 // Reset edge drag offset
+        // No haptic feedback on start to match regular calendar drag
+    }
+    
+    /// Update edge drag offset continuously during drag
+    func updateEdgeDragOffset(_ offset: CGFloat) {
+        edgeDragOffset = offset
+    }
+    
     /// Handle drag gesture end with position snapping
     func handleDragEnd(translation: CGSize, predictedTranslation: CGSize, screenHeight: CGFloat) {
         guard dragStartedInDateSection else { return }
@@ -72,6 +85,7 @@ class CalendarOverlayViewModel: ObservableObject {
         }
         
         dragStartedInDateSection = false
+        edgeDragOffset = 0 // Reset edge drag offset when drag ends
     }
     
     // MARK: - Position Management

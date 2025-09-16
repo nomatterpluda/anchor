@@ -12,6 +12,7 @@ import SwiftUI
 
 struct CalendarTestView: View {
     @State private var sheetPosition: CGFloat = 0.5 // Start at mid position
+    @StateObject private var overlayViewModel = CalendarOverlayViewModel()
     
     let minHeightRatio: CGFloat = 0.2
     let midHeightRatio: CGFloat = 0.5
@@ -42,7 +43,8 @@ struct CalendarTestView: View {
                     geometry: geometry,
                     minHeightRatio: minHeightRatio,
                     midHeightRatio: midHeightRatio,
-                    maxHeightRatio: maxHeightRatio
+                    maxHeightRatio: maxHeightRatio,
+                    overlayViewModel: overlayViewModel
                 )
             }
         }
