@@ -45,10 +45,7 @@ class CalendarOverlayViewModel: ObservableObject {
     /// Handle drag gesture start
     func handleDragStart(at locationY: CGFloat, sheetHeight: CGFloat) {
         dragStartedInDateSection = shouldStartDrag(at: locationY, sheetHeight: sheetHeight)
-        
-        if dragStartedInDateSection {
-            Haptic.shared.lightImpact()
-        }
+        // No haptic feedback on drag start
     }
     
     /// Handle drag gesture end with position snapping
@@ -65,9 +62,9 @@ class CalendarOverlayViewModel: ObservableObject {
         let positions: [CGFloat] = [minHeightRatio, midHeightRatio, maxHeightRatio]
         let target = positions.min(by: { abs($0 - predicted) < abs($1 - predicted) }) ?? maxHeightRatio
         
-        // Haptic feedback when sheet snaps to a position
+        // Soft haptic feedback when sheet snaps to a position
         if abs(target - sheetPosition) > 0.1 {
-            Haptic.shared.mediumImpact()
+            Haptic.shared.softImpact()
         }
         
         withAnimation(.interactiveSpring(response: 0.32, dampingFraction: 0.82, blendDuration: 0.25)) {
