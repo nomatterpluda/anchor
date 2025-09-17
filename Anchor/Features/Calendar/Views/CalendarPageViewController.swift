@@ -109,7 +109,7 @@ struct CalendarPageViewController: UIViewControllerRepresentable {
                 return cachedViewController
             }
             
-            let viewController = CalendarViewController(date: date)
+            let viewController = CalendarViewController(date: date, onDateChange: parent.onDateChange)
             viewControllerCache[dateKey] = viewController
             
             // Limit cache size to prevent memory issues
@@ -126,10 +126,12 @@ struct CalendarPageViewController: UIViewControllerRepresentable {
 // MARK: - UIViewController for Calendar Pages
 class CalendarViewController: UIViewController {
     let date: Date
-    private var hostingController: UIHostingController<CalendarGridView>?
+    let onDateChange: (Date) -> Void
+    private var hostingController: UIHostingController<CalendarKitTimelineView>?
     
-    init(date: Date) {
+    init(date: Date, onDateChange: @escaping (Date) -> Void) {
         self.date = date
+        self.onDateChange = onDateChange
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -143,10 +145,10 @@ class CalendarViewController: UIViewController {
     }
     
     private func setupCalendarView() {
-        // Create SwiftUI CalendarGridView
-        let calendarView = CalendarGridView(
+        // Create SwiftUI CalendarKitTimelineView (replaces CalendarGridView)
+        let calendarView = CalendarKitTimelineView(
             displayDate: date,
-            showCurrentTimeLine: true // Will show only if date is today
+            onDateChange: onDateChange
         )
         
         // Wrap in UIHostingController
