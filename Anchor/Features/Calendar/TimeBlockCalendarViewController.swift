@@ -1,11 +1,14 @@
 import UIKit
 import SwiftData
 
-class TimeBlockCalendarViewController: UIViewController {
+class TimeBlockCalendarViewController: UIViewController, TimelineViewDelegate {
     
     private let timelineContainer: TimelineContainerController
     private let calendar = Calendar.current
     private var currentDate: Date = Date()
+    
+    // SwiftData ModelContext for fetching TimeBlocks
+    var modelContext: ModelContext?
     
     // Callback to communicate date changes back to SwiftUI
     var onDateChange: ((Date) -> Void)?
@@ -46,7 +49,8 @@ class TimeBlockCalendarViewController: UIViewController {
         style.separatorColor = UIColor.lightGray
         timelineContainer.timeline.updateStyle(style)
         
-        // TimelineView doesn't use dataSource - we'll set layoutAttributes directly
+        // Set up delegate for handling user interactions
+        timelineContainer.timeline.delegate = self
         
         // Add as child view controller
         addChild(timelineContainer)
@@ -78,26 +82,79 @@ class TimeBlockCalendarViewController: UIViewController {
     
     // MARK: - Event Management
     private func eventsForDate(_ date: Date) -> [EventDescriptor] {
-        // Use currentDate instead of parameter (since we manage dates ourselves)
-        let calendar = Calendar.current
-        
-        // Create test TimeBlock for today only
-        guard calendar.isDate(currentDate, inSameDayAs: Date()) else {
-            return []
+        guard let modelContext = modelContext else { 
+            print("ModelContext not available for fetching TimeBlocks")
+            return [] 
         }
         
-        let testBlock1 = TimeBlock(
-            name: "Morning Meeting",
-            startDate: calendar.date(bySettingHour: 9, minute: 0, second: 0, of: currentDate) ?? currentDate,
-            endDate: calendar.date(bySettingHour: 10, minute: 30, second: 0, of: currentDate) ?? currentDate
+        let startOfDay = calendar.startOfDay(for: date)
+        let endOfDay = calendar.date(byAdding: .day, value: 1, to: startOfDay) ?? startOfDay
+        
+        let fetchDescriptor = FetchDescriptor<TimeBlock>(
+            predicate: #Predicate<TimeBlock> { block in
+                block.startDate >= startOfDay && block.startDate < endOfDay
+            },
+            sortBy: [SortDescriptor(\.startDate, order: .forward)]
         )
         
-        let testBlock2 = TimeBlock(
-            name: "Deep Work",
-            startDate: calendar.date(bySettingHour: 14, minute: 0, second: 0, of: currentDate) ?? currentDate,
-            endDate: calendar.date(bySettingHour: 16, minute: 0, second: 0, of: currentDate) ?? currentDate
+        do {
+            let timeBlocks = try modelContext.fetch(fetchDescriptor)
+            return timeBlocks  // TimeBlock already conforms to EventDescriptor
+        } catch {
+            print("Failed to fetch time blocks: \(error)")
+            return []
+        }
+    }
+}
+
+// MARK: - TimelineViewDelegate
+extension TimeBlockCalendarViewController {
+    func timelineView(_ timelineView: TimelineView, didTapAt date: Date) {
+        // Handle tap on empty space - could be used for quick event creation
+        print("Tapped at: \(date)")
+    }
+    
+    func timelineView(_ timelineView: TimelineView, didLongPressAt date: Date) {
+        // Handle long press on empty space - create new TimeBlock
+        createTimeBlock(at: date)
+    }
+    
+    func timelineView(_ timelineView: TimelineView, didTap event: EventView) {
+        // Handle tap on existing event - could be used for editing
+        print("Tapped event: \(event)")
+    }
+    
+    func timelineView(_ timelineView: TimelineView, didLongPress event: EventView) {
+        // Handle long press on existing event - could be used for context menu
+        print("Long pressed event: \(event)")
+    }
+    
+    private func createTimeBlock(at date: Date) {
+        guard let modelContext = modelContext else {
+            print("ModelContext not available for creating TimeBlock")
+            return
+        }
+        
+        // Create a new TimeBlock at the pressed time with 1 hour duration
+        let endDate = calendar.date(byAdding: .hour, value: 1, to: date) ?? date
+        
+        let newTimeBlock = TimeBlock(
+            name: "New Task",
+            startDate: date,
+            endDate: endDate
         )
         
-        return [testBlock1, testBlock2]
+        // Save to SwiftData
+        modelContext.insert(newTimeBlock)
+        
+        do {
+            try modelContext.save()
+            print("Created new TimeBlock: \(newTimeBlock.name) at \(date)")
+            
+            // Refresh the timeline to show the new event
+            move(to: currentDate)
+        } catch {
+            print("Failed to save new TimeBlock: \(error)")
+        }
     }
 }

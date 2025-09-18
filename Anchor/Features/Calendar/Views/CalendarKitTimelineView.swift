@@ -15,9 +15,12 @@ struct CalendarKitTimelineView: UIViewControllerRepresentable {
     let displayDate: Date
     let onDateChange: (Date) -> Void
     
+    @Environment(\.modelContext) private var modelContext
+    
     func makeUIViewController(context: Context) -> TimeBlockCalendarViewController {
         let controller = TimeBlockCalendarViewController()
         controller.onDateChange = onDateChange
+        controller.modelContext = modelContext
         controller.move(to: displayDate)
         // Force light theme
         controller.overrideUserInterfaceStyle = .light
