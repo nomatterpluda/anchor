@@ -21,31 +21,36 @@ struct ToDoView: View {
     let maxHeightRatio: CGFloat = 1.0  // Full calendar view
     
     var body: some View {
-        GeometryReader { geometry in
-            // Secondary Layer: Your existing task management system
-            ProjectFilteredToDoView()
-                .overlay(
-                    // Edge swipe areas (invisible but always active)
-                    EdgeSwipeAreas(
-                        overlayViewModel: calendarOverlayViewModel,
-                        geometry: geometry
+        ZStack(alignment: .top) {
+            // Layer 1: Todo List (respects keyboard safe area)
+            GeometryReader { geometry in
+                ProjectFilteredToDoView()
+                    .overlay(
+                        // Edge swipe areas (invisible but always active)
+                        EdgeSwipeAreas(
+                            overlayViewModel: calendarOverlayViewModel,
+                            geometry: geometry
+                        )
                     )
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(edges: [.top, .horizontal]) // Respects bottom for keyboard
+            
+            // Layer 2: Calendar (ignores all safe areas)
+            GeometryReader { geometry in
+                UpsideDownBottomSheet(
+                    sheetPosition: $sheetPosition,
+                    geometry: geometry,
+                    minHeightRatio: minHeightRatio,
+                    midHeightRatio: midHeightRatio,
+                    maxHeightRatio: maxHeightRatio,
+                    overlayViewModel: calendarOverlayViewModel
                 )
-                .overlay(
-                    // Primary Layer: Calendar overlay (anchored to top)
-                    UpsideDownBottomSheet(
-                        sheetPosition: $sheetPosition,
-                        geometry: geometry,
-                        minHeightRatio: minHeightRatio,
-                        midHeightRatio: midHeightRatio,
-                        maxHeightRatio: maxHeightRatio,
-                        overlayViewModel: calendarOverlayViewModel
-                    ),
-                    alignment: .top
-                )
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .ignoresSafeArea(edges: .all) // Ignores all safe areas
+            .allowsHitTesting(true) // Ensure calendar remains interactive
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(edges: [.top, .horizontal])
         .onAppear {
             // Sync initial state
             calendarOverlayViewModel.sheetPosition = sheetPosition
