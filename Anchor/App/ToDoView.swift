@@ -45,7 +45,7 @@ struct ToDoView: View {
                 )
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .ignoresSafeArea(edges: .all)
+        .ignoresSafeArea(edges: [.top, .horizontal])
         .onAppear {
             // Sync initial state
             calendarOverlayViewModel.sheetPosition = sheetPosition

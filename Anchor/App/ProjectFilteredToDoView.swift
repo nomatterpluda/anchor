@@ -25,7 +25,7 @@ struct ProjectFilteredToDoView: View {
     var body: some View {
         ZStack {
             Color.black
-                .ignoresSafeArea(edges: .all)
+                .ignoresSafeArea(edges: [.top, .horizontal])
             
             VStack(spacing: 0) {
                 // Task list with dynamic accent color
