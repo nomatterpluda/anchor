@@ -60,6 +60,9 @@ class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
         overrideUserInterfaceStyle = .light
         dayView.overrideUserInterfaceStyle = .light
         
+        // Hide the top header view to give more space to the day view
+        dayView.isHeaderViewVisible = false
+        
         // Configure appearance
         view.backgroundColor = UIColor.white
         

@@ -29,8 +29,8 @@ public class DayView: UIView, TimelinePagerViewDelegate {
         didSet {
             headerHeight = isHeaderViewVisible ? DayView.headerVisibleHeight : 0
             dayHeaderView.isHidden = !isHeaderViewVisible
+            updateTimelineConstraints()
             setNeedsLayout()
-            configureLayout()
         }
     }
     
@@ -73,6 +73,10 @@ public class DayView: UIView, TimelinePagerViewDelegate {
     
     private var style = CalendarStyle()
     
+    // Constraint references for dynamic header visibility
+    private var timelineTopToHeaderConstraint: NSLayoutConstraint?
+    private var timelineTopToSafeAreaConstraint: NSLayoutConstraint?
+    
     public init(calendar: Calendar = Calendar.autoupdatingCurrent) {
         self.calendar = calendar
         self.dayHeaderView = DayHeaderView(calendar: calendar)
@@ -112,6 +116,7 @@ public class DayView: UIView, TimelinePagerViewDelegate {
         dayHeaderView.translatesAutoresizingMaskIntoConstraints = false
         timelinePagerView.translatesAutoresizingMaskIntoConstraints = false
 
+        // Header constraints
         dayHeaderView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor).isActive = true
         dayHeaderView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor).isActive = true
         dayHeaderView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor).isActive = true
@@ -119,10 +124,30 @@ public class DayView: UIView, TimelinePagerViewDelegate {
         heightConstraint.priority = .defaultLow
         heightConstraint.isActive = true
 
+        // Timeline constraints (except top - handled dynamically)
         timelinePagerView.leadingAnchor.constraint(equalTo: safeAreaLayoutGuide.leadingAnchor).isActive = true
         timelinePagerView.trailingAnchor.constraint(equalTo: safeAreaLayoutGuide.trailingAnchor).isActive = true
-        timelinePagerView.topAnchor.constraint(equalTo: dayHeaderView.bottomAnchor).isActive = true
         timelinePagerView.bottomAnchor.constraint(equalTo: bottomAnchor).isActive = true
+        
+        // Create both possible top constraints but don't activate yet
+        timelineTopToHeaderConstraint = timelinePagerView.topAnchor.constraint(equalTo: dayHeaderView.bottomAnchor)
+        timelineTopToSafeAreaConstraint = timelinePagerView.topAnchor.constraint(equalTo: safeAreaLayoutGuide.topAnchor)
+        
+        // Activate the appropriate constraint
+        updateTimelineConstraints()
+    }
+    
+    private func updateTimelineConstraints() {
+        // Deactivate both constraints first
+        timelineTopToHeaderConstraint?.isActive = false
+        timelineTopToSafeAreaConstraint?.isActive = false
+        
+        // Activate the appropriate constraint based on header visibility
+        if isHeaderViewVisible {
+            timelineTopToHeaderConstraint?.isActive = true
+        } else {
+            timelineTopToSafeAreaConstraint?.isActive = true
+        }
     }
     
     public func updateStyle(_ newStyle: CalendarStyle) {
