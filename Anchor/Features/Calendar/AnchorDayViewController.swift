@@ -132,8 +132,16 @@ class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
         var style = CalendarStyle()
         style.timeline.backgroundColor = UIColor.white
         style.timeline.timeIndicator.color = UIColor.systemRed
-        style.timeline.timeColor = UIColor.darkGray
-        style.timeline.separatorColor = UIColor.lightGray
+        
+        // Hour spacing for balanced design
+        style.timeline.verticalDiff = 75 // Balanced spacing between hours
+        
+        // Update time text color to lighter grey (#8E8E93)
+        style.timeline.timeColor = UIColor(red: 0x8E/255.0, green: 0x8E/255.0, blue: 0x93/255.0, alpha: 1.0)
+        
+        // Update separator line color to be more subtle
+        style.timeline.separatorColor = UIColor.systemGray5 // More subtle than lightGray
+        
         style.timeline.minimumEventDurationInMinutesWhileEditing = 30
         
         updateStyle(style)
