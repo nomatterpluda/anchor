@@ -255,18 +255,15 @@ class AnchorDayViewController: DayViewController {
         }
         lastProcessedUpdate = (timeBlock.timeBlockID, now)
         
-        print("💾 Saving updated TimeBlock: \(timeBlock.name)")
+        print("💾 Updating TimeBlock: \(timeBlock.name)")
         print("   New time: \(timeBlock.dateInterval)")
-        
-        // Commit editing to apply changes to the original if this is an editing copy
-        timeBlock.commitEditing()
         
         guard let modelContext = modelContext else {
             print("⚠️ Cannot save - ModelContext not available")
             return
         }
         
-        // Simple approach: Check if TimeBlock exists in SwiftData, if not, insert it
+        // Find the original TimeBlock in SwiftData and update it
         do {
             let targetID = timeBlock.timeBlockID
             let descriptor = FetchDescriptor<TimeBlock>(predicate: #Predicate<TimeBlock> { block in
@@ -274,27 +271,28 @@ class AnchorDayViewController: DayViewController {
             })
             let existingBlocks = try modelContext.fetch(descriptor)
             
-            if existingBlocks.isEmpty {
-                // TimeBlock doesn't exist - insert it
-                modelContext.insert(timeBlock)
-                print("📦 Inserted new TimeBlock into SwiftData")
+            if let originalTimeBlock = existingBlocks.first {
+                // Update the original TimeBlock with new times
+                originalTimeBlock.startDate = timeBlock.startDate
+                originalTimeBlock.endDate = timeBlock.endDate
+                originalTimeBlock.lastUpdate = Date.now
+                print("✅ Updated original TimeBlock in SwiftData")
             } else {
-                print("📝 TimeBlock already exists in SwiftData - no insertion needed")
+                print("⚠️ Could not find original TimeBlock to update")
             }
         } catch {
-            print("⚠️ Error checking TimeBlock existence: \(error)")
-            // Fallback: try to insert (SwiftData will handle duplicates)
-            modelContext.insert(timeBlock)
-            print("📦 Fallback: Inserted TimeBlock into SwiftData")
+            print("⚠️ Error finding original TimeBlock: \(error)")
         }
+        
+        // Commit editing to clear visual state (this handles the editing copy)
+        timeBlock.commitEditing()
         
         // Save changes to SwiftData
         saveChanges()
         
-        // End editing mode immediately and reload data to show the committed TimeBlock
+        // End editing mode and reload to show the updated original
         endEventEditing()
         
-        // Reload data to refresh the view and remove any editing artifacts
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             self.reloadData()
         }
@@ -316,13 +314,16 @@ class AnchorDayViewController: DayViewController {
             endDate: endDate
         )
         
-        // DON'T insert into SwiftData yet - only when editing is committed
-        // This prevents the "double TimeBlock" issue
+        // Insert the ORIGINAL TimeBlock into SwiftData immediately
+        // CalendarKit will create its own editing copy for the UI
+        modelContext.insert(newTimeBlock)
+        saveChanges()
         
-        // Start editing the new TimeBlock immediately (CalendarKit will handle visual creation)
+        // Start editing the new TimeBlock (CalendarKit will create editing copy)
         beginEditing(event: newTimeBlock, animated: true)
         
-        print("✅ Created new TimeBlock in editing mode: \(newTimeBlock.name)")
+        print("✅ Created and inserted new TimeBlock: \(newTimeBlock.name)")
+        print("   TimeBlock ID: \(newTimeBlock.timeBlockID)")
     }
     
     private func saveChanges() {
