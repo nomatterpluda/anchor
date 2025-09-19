@@ -29,19 +29,68 @@ extension TimeBlock: EventDescriptor {
     public var textColor: UIColor { .white }
     
     public var backgroundColor: UIColor { 
-        color.withAlphaComponent(0.3) 
+        // If this TimeBlock is editing another (i.e., it's an editing copy),
+        // make it more opaque for better visual feedback
+        if editedEvent != nil {
+            return color.withAlphaComponent(0.8)  // More opaque during editing
+        } else {
+            return color.withAlphaComponent(0.3)  // Normal transparency
+        }
     }
+    
+    // Storage for tracking which TimeBlock this one is editing (if any)
+    private static var editingStorage = [String: TimeBlock]()
     
     public var editedEvent: EventDescriptor? { 
-        get { nil } 
-        set { }
+        get { 
+            return Self.editingStorage[timeBlockID]
+        }
+        set { 
+            if let originalTimeBlock = newValue as? TimeBlock {
+                Self.editingStorage[timeBlockID] = originalTimeBlock
+            } else {
+                Self.editingStorage.removeValue(forKey: timeBlockID)
+            }
+        }
     }
     
-    public func makeEditable() -> Self { 
-        self 
+    public func makeEditable() -> Self {
+        // Create a copy TimeBlock for editing (following CalendarKit's Event pattern)
+        let editingCopy = TimeBlock(
+            name: self.name,
+            startDate: self.startDate, 
+            endDate: self.endDate,
+            iconName: self.iconName
+        )
+        
+        // Copy other properties
+        editingCopy.colorID = self.colorID
+        editingCopy.isManualColor = self.isManualColor
+        editingCopy.notes = self.notes
+        editingCopy.hasStartNotification = self.hasStartNotification
+        editingCopy.hasEndNotification = self.hasEndNotification
+        
+        // Set up editing relationship - the copy points to the original
+        editingCopy.editedEvent = self
+        
+        return editingCopy as! Self
     }
     
     public func commitEditing() { 
-        lastUpdate = Date.now
+        guard let originalTimeBlock = editedEvent as? TimeBlock else {
+            // This TimeBlock is not editing anything - just update timestamp
+            lastUpdate = Date.now
+            return
+        }
+        
+        // This is an editing copy - apply changes to the original
+        originalTimeBlock.startDate = self.startDate
+        originalTimeBlock.endDate = self.endDate
+        originalTimeBlock.lastUpdate = Date.now
+        
+        print("✅ TimeBlock editing committed: '\(originalTimeBlock.name)' updated to \(self.dateInterval)")
+        
+        // Clear the editing relationship
+        self.editedEvent = nil
     }
 }

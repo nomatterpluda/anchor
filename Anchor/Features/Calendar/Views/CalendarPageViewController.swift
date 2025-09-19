@@ -127,7 +127,7 @@ struct CalendarPageViewController: UIViewControllerRepresentable {
 class CalendarViewController: UIViewController {
     let date: Date
     let onDateChange: (Date) -> Void
-    private var hostingController: UIHostingController<CalendarKitTimelineView>?
+    private var hostingController: UIHostingController<CalendarKitDayView>?
     
     init(date: Date, onDateChange: @escaping (Date) -> Void) {
         self.date = date
@@ -145,8 +145,8 @@ class CalendarViewController: UIViewController {
     }
     
     private func setupCalendarView() {
-        // Create SwiftUI CalendarKitTimelineView (replaces CalendarGridView)
-        let calendarView = CalendarKitTimelineView(
+        // Create SwiftUI CalendarKitDayView with full editing capabilities
+        let calendarView = CalendarKitDayView(
             displayDate: date,
             onDateChange: onDateChange
         )

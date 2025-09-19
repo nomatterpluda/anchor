@@ -4,7 +4,9 @@
       "Bash(xcodebuild:*)",
       "Read(//Users/alexpluda/Downloads/Anchor/Anchor/View/**)",
       "Read(//Users/alexpluda/Downloads/Anchor/Anchor/Model/**)",
-      "Read(//Users/alexpluda/Downloads/Anchor/**)"
+      "Read(//Users/alexpluda/Downloads/Anchor/**)",
+      "Bash(rm:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": []
