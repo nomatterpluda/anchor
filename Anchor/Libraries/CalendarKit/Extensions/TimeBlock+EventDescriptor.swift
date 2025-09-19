@@ -14,27 +14,54 @@ extension TimeBlock: EventDescriptor {
     
     public var isAllDay: Bool { false }
     
-    public var text: String { name }
+    public var text: String { 
+        // This is now handled by the custom EventView layout
+        return name
+    }
     
     public var attributedText: NSAttributedString? { nil }
     
     public var lineBreakMode: NSLineBreakMode? { nil }
     
-    public var font: UIFont { .boldSystemFont(ofSize: 12) }
-    
-    public var color: UIColor { 
-        UIColor(swiftUIColor)
+    public var font: UIFont { 
+        // Use lighter weight for placeholder text
+        if todos.isEmpty {
+            return .systemFont(ofSize: 12, weight: .medium)
+        } else {
+            return .boldSystemFont(ofSize: 12)
+        }
     }
     
-    public var textColor: UIColor { .white }
+    public var color: UIColor { 
+        // For empty blocks, use the subtle grey color from Figma design
+        if todos.isEmpty {
+            return UIColor(red: 0.78, green: 0.78, blue: 0.78, alpha: 1.0)
+        } else {
+            return UIColor(swiftUIColor)
+        }
+    }
+    
+    public var textColor: UIColor { 
+        // For empty blocks, use darker grey text for better readability
+        if todos.isEmpty {
+            return UIColor(red: 0.55, green: 0.55, blue: 0.58, alpha: 1.0) // Similar to system gray
+        } else {
+            return .white
+        }
+    }
     
     public var backgroundColor: UIColor { 
-        // If this TimeBlock is editing another (i.e., it's an editing copy),
-        // make it more opaque for better visual feedback
-        if editedEvent != nil {
-            return color.withAlphaComponent(0.8)  // More opaque during editing
+        // For empty blocks, use the subtle background from Figma
+        if todos.isEmpty {
+            return UIColor(red: 0.78, green: 0.78, blue: 0.78, alpha: 0.1)
         } else {
-            return color.withAlphaComponent(0.3)  // Normal transparency
+            // If this TimeBlock is editing another (i.e., it's an editing copy),
+            // make it more opaque for better visual feedback
+            if editedEvent != nil {
+                return color.withAlphaComponent(0.8)  // More opaque during editing
+            } else {
+                return color.withAlphaComponent(0.3)  // Normal transparency
+            }
         }
     }
     

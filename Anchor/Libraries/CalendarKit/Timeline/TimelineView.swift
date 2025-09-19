@@ -84,14 +84,14 @@ public final class TimelineView: UIView {
     }
 
     var style = TimelineStyle()
-    private var horizontalEventInset: Double = 3
+    private var horizontalEventInset: Double = 16 // Right padding so events don't touch screen border
 
     public var fullHeight: Double {
         style.verticalInset * 2 + style.verticalDiff * 24
     }
 
     public var calendarWidth: Double {
-        bounds.width - style.leadingInset
+        bounds.width - style.leadingInset - horizontalEventInset
     }
     
     public private(set) var is24hClock = true {

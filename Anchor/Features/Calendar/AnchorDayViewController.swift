@@ -106,6 +106,8 @@ class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
             // Show sheet for any pending new TimeBlock
             if let timeBlockID = pendingNewTimeBlockID {
                 print("📋 Showing sheet for pending TimeBlock: \(timeBlockID)")
+                // Add haptic feedback when finger is lifted and TimeBlock is confirmed
+                Haptic.shared.softImpact()
                 showAddEventSheet(for: timeBlockID)
                 pendingNewTimeBlockID = nil
             }
@@ -370,6 +372,9 @@ class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
         modelContext.insert(newTimeBlock)
         saveChanges()
         
+        // Add haptic feedback for TimeBlock creation
+        Haptic.shared.mediumImpact()
+        
         // Track this TimeBlock as pending for sheet display
         pendingNewTimeBlockID = newTimeBlock.timeBlockID
         
@@ -434,6 +439,8 @@ class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
     
     private func handleSheetSave() {
         print("✅ Sheet saved - exiting edit mode")
+        // Add haptic feedback when TimeBlock details are saved
+        Haptic.shared.success()
         endEventEditing()
         reloadData()
     }
