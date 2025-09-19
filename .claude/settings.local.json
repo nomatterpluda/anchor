@@ -6,7 +6,8 @@
       "Read(//Users/alexpluda/Downloads/Anchor/Anchor/Model/**)",
       "Read(//Users/alexpluda/Downloads/Anchor/**)",
       "Bash(rm:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

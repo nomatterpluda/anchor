@@ -13,7 +13,7 @@ import UIKit
 import SwiftData
 import SwiftUI
 
-class AnchorDayViewController: DayViewController {
+class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
     
     // MARK: - Properties
     
@@ -35,6 +35,9 @@ class AnchorDayViewController: DayViewController {
     
     /// Track last processed update to prevent duplicate saves
     private var lastProcessedUpdate: (timeBlockID: String, timestamp: Date) = ("", Date.distantPast)
+    
+    /// Track newly created TimeBlock ID to show sheet when long press ends
+    private var pendingNewTimeBlockID: String?
     
     // MARK: - Initialization
     
@@ -74,11 +77,46 @@ class AnchorDayViewController: DayViewController {
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(debugTap(_:)))
         tapGesture.cancelsTouchesInView = false
         view.addGestureRecognizer(tapGesture)
+        
+        // Add custom long press gesture to detect end state
+        let customLongPress = UILongPressGestureRecognizer(target: self, action: #selector(handleLongPress(_:)))
+        customLongPress.minimumPressDuration = 0.5
+        customLongPress.delegate = self
+        dayView.addGestureRecognizer(customLongPress)
     }
     
     @objc private func debugTap(_ gesture: UITapGestureRecognizer) {
         let location = gesture.location(in: view)
         print("🖱️ Debug tap detected at: \(location)")
+    }
+    
+    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+        let location = gesture.location(in: dayView)
+        
+        switch gesture.state {
+        case .began:
+            print("🔗 Custom long press began at: \(location)")
+            // Don't create TimeBlock here - let CalendarKit handle it via didLongPressTimelineAt
+            
+        case .ended, .cancelled, .failed:
+            print("🔗 Custom long press ended - checking for pending TimeBlock")
+            // Show sheet for any pending new TimeBlock
+            if let timeBlockID = pendingNewTimeBlockID {
+                print("📋 Showing sheet for pending TimeBlock: \(timeBlockID)")
+                showAddEventSheet(for: timeBlockID)
+                pendingNewTimeBlockID = nil
+            }
+            
+        default:
+            break
+        }
+    }
+    
+    // MARK: - UIGestureRecognizerDelegate
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRecognizeSimultaneouslyWith otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        // Allow our custom long press to work alongside CalendarKit's gestures
+        return true
     }
     
     // MARK: - Configuration
@@ -319,11 +357,78 @@ class AnchorDayViewController: DayViewController {
         modelContext.insert(newTimeBlock)
         saveChanges()
         
+        // Track this TimeBlock as pending for sheet display
+        pendingNewTimeBlockID = newTimeBlock.timeBlockID
+        
         // Start editing the new TimeBlock (CalendarKit will create editing copy)
         beginEditing(event: newTimeBlock, animated: true)
         
         print("✅ Created and inserted new TimeBlock: \(newTimeBlock.name)")
         print("   TimeBlock ID: \(newTimeBlock.timeBlockID)")
+        print("📝 Pending for sheet display on long press end")
+    }
+    
+    private func showAddEventSheet(for timeBlockID: String) {
+        print("📋 Showing add event sheet for TimeBlock: \(timeBlockID)")
+        
+        // Find the TimeBlock to pass to the sheet
+        guard let modelContext = modelContext else {
+            print("⚠️ Cannot show sheet - ModelContext not available")
+            return
+        }
+        
+        do {
+            let descriptor = FetchDescriptor<TimeBlock>(predicate: #Predicate<TimeBlock> { block in
+                block.timeBlockID == timeBlockID
+            })
+            let timeBlocks = try modelContext.fetch(descriptor)
+            
+            if let timeBlock = timeBlocks.first {
+                // Present the sheet with the TimeBlock
+                presentAddEventSheet(with: timeBlock)
+            } else {
+                print("⚠️ Could not find TimeBlock to edit")
+            }
+        } catch {
+            print("⚠️ Error finding TimeBlock for sheet: \(error)")
+        }
+    }
+    
+    private func presentAddEventSheet(with timeBlock: TimeBlock) {
+        // Create SwiftUI sheet with callbacks to exit edit mode
+        let addEventView = AddEventSheetView(timeBlock: timeBlock) { [weak self] action in
+            switch action {
+            case .save:
+                self?.handleSheetSave()
+            case .cancel:
+                self?.handleSheetCancel()
+            }
+        }
+        let hostingController = UIHostingController(rootView: addEventView)
+        
+        // Present as modal sheet
+        hostingController.modalPresentationStyle = .pageSheet
+        
+        // Configure sheet presentation - iOS 26.0 deployment target supports this
+        if let sheet = hostingController.sheetPresentationController {
+            sheet.detents = [.medium(), .large()]
+            sheet.prefersGrabberVisible = true
+        }
+        
+        present(hostingController, animated: true)
+        print("📋 Presented add event sheet (event stays in edit mode)")
+    }
+    
+    private func handleSheetSave() {
+        print("✅ Sheet saved - exiting edit mode")
+        endEventEditing()
+        reloadData()
+    }
+    
+    private func handleSheetCancel() {
+        print("❌ Sheet cancelled - exiting edit mode") 
+        endEventEditing()
+        reloadData()
     }
     
     private func saveChanges() {
