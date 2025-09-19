@@ -278,6 +278,8 @@ class AnchorDayViewController: DayViewController, UIGestureRecognizerDelegate {
     
     override func dayView(dayView: DayView, didMoveTo date: Date) {
         print("📅 Did move to: \(date)")
+        currentDate = date
+        onDateChange?(date)
         super.dayView(dayView: dayView, didMoveTo: date)
     }
     

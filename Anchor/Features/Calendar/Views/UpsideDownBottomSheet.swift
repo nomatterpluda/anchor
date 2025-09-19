@@ -32,9 +32,9 @@ struct UpsideDownBottomSheet: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // UIPageViewController for native iOS pagination behavior
-            CalendarPageViewController(
-                currentDate: $calendarViewModel.currentDate,
+            // CalendarKit day view with built-in pagination
+            CalendarKitDayView(
+                displayDate: calendarViewModel.currentDate,
                 onDateChange: { newDate in
                     calendarViewModel.goToDate(newDate)
                 }
